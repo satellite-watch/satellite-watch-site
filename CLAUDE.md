@@ -61,5 +61,11 @@
   - GitHub 側は、送る前に Pages の公開元を「GitHub Actions」にする。github-pages 環境で公開できる枝を main だけにする。main に「直接の保存を禁止する」保護ルールは付けない（自動更新が止まる）。独自ドメインはアカウントの Verified domains で確認済みにしてから置き場所に設定し、HTTPS を強制する
   - 公開後、/CLAUDE.md・/README.md・/scripts/…・/img/src/… などが「見つかりません」になることを確かめる
   - **公開後の手直しは、公開用の新しいフォルダで行う**（2026-10-02 オーナー判断）。公開用の置き場所を手元に取り込んだフォルダを作業場所にし、今のフォルダは「保管用」として名前を変えて残す（これまでの記録・枝 hoshi-ryuseigun・記録番号 e79bfd0 などはそこにある）。引っ越しのとき、`.claude/`（担当と launch.json）が新しいフォルダで動くこと、Claude の手元の記憶（フォルダごとに分かれている）を移すことを確かめる。送る前には毎回、置き場所の最新（自動更新の記録）を取り込む
-- 公開先：GitHub Pages（無料）の予定。公開用の場所を作る前にオーナーへ確認する
+- **2026-10-04 に公開した**（https://satellite-watch.jp/ 。GitHub Pages、置き場所 `satellite-watch/satellite-watch-site`）
+  - 作業のフォルダは公開用の `satellite-watch-site`。前のフォルダは保管用（これまでの記録・枝 hoshi-ryuseigun・記録番号 e79bfd0 などはそこにある）
+  - このパソコンから送るときは、置き場所専用の鍵（Deploy keys「このMacから送る用」、書き込み可）を使う。鍵の場所はこのフォルダの git の設定（core.sshCommand）に入れてある。この鍵は置き場所1つにしか使えない。送る前に毎回 `git pull` で自動更新の記録を取り込む
+  - お名前.com の DNS：A 4行・AAAA 4行（GitHub Pages）、www は CNAME で satellite-watch.github.io（www で開くと satellite-watch.jp へ移る）、ドメイン確認の TXT。GitHub のアカウントの Verified domains で確認済み、Enforce HTTPS オン
+  - **お名前.com で設定を変えるときは、有料のおまけのチェックに気をつける**（2026-10-04、DNS の設定と一緒に有料のドメインプロテクションが申し込まれてしまい、オーナーが解約した）
+  - 公開した日に確かめたこと：スマホ幅と PC で各ページが出る、開発メモ（/CLAUDE.md など）は「見つかりません」、http は https へ移る、手で動かした自動更新（データの取り直し・地名検索の確認・公開）がすべて成功
+  - GitHub から「ubuntu-latest が 2026-10-19 から Ubuntu 26 に変わる」とのお知らせが出ている（いまは対応不要）。10月19日より後の最初の自動更新が成功しているかを確かめる
 - 軌道データは GitHub Actions で1日3回取り直して `data/sats.json` に保存。見る人のブラウザから CelesTrak へは取りに行かない
