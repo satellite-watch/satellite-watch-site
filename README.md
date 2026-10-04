@@ -20,6 +20,8 @@
 | `img/sats/` | 衛星の写真・想像図（NASA）。出典と利用条件は `SOURCES.md` |
 | `js/worker.js` | 見える回の計算を裏で行う係（画面を固めないため） |
 | `js/shared.js` | 衛星のページと図鑑のページで共通のもの（日本時間の扱い・場所の保存・地名検索・現在地） |
+| `js/ga.js` | 見た人を数える仕組み（Google アナリティクス）。測定IDはここだけ。satellite-watch.jp で開いたときだけ動く |
+| `privacy.html` | プライバシーポリシー（送り先・送る情報・目的）。外へ送る仕組みを変えたら、ここも直して日付を新しくする |
 | `lib/satellite.min.js` | 軌道計算の部品 satellite.js 7.1.0（MIT）。`npm run build-lib` で作り直せる |
 | `data/sats.json` | 軌道データ（CelesTrak の visual グループ）＋国・打ち上げ日（CelesTrak の衛星登録台帳） |
 | `data/muni.json` | 市区町村コード→名前（地名検索で同名の場所を区別するため） |
@@ -45,7 +47,8 @@
 | 地図の部品：Leaflet 1.9.4 | cdnjs（Cloudflare の無料の配信）から読む | BSD 2条項ライセンス（商用可。部品を配るときは著作権表示を残す。このサイトは配っていない） | 地図の右下に「Leaflet」と出る |
 | 計算の部品：satellite.js 7.1.0 | `lib/satellite.min.js` に入れて配る | MIT ライセンス（商用可。配るときは著作権表示と許諾文を付ける） | `lib/satellite.js-LICENSE.md` も一緒に公開。ページの下に「satellite.js（MITライセンス）」 |
 | 共有用の画像の文字：Noto Sans JP | 画像を作るときだけ使い、サイトには載せない | SIL Open Font License 1.1（商用可。作った画像に制限はない） | 本文は `img/src/fonts/OFL.txt` |
-| お問い合わせ：Google フォーム | ページの下からリンク | Google の利用規約 | 受け取った返信先のメールアドレスの使い道は、広告を始めるときのプライバシーポリシーに書く |
+| アクセス解析：Google アナリティクス（GA4） | `js/ga.js` が satellite-watch.jp で開いたときだけ読み込む | [Google アナリティクス利用規約](https://marketingplatform.google.com/about/analytics/terms/jp/)：Cookie などの利用と情報の収集をプライバシーポリシーで知らせること | `privacy.html` に書いた。Google シグナル・広告のカスタマイズはオフ。データ共有設定はすべてオフ、データ保持14か月 |
+| お問い合わせ：Google フォーム | ページの下からリンク | Google の利用規約 | 返信先のメールアドレスは返信にだけ使う、と `privacy.html` とフォームの説明に書いた |
 
 ## 見える条件
 

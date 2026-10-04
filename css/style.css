@@ -372,8 +372,9 @@ p.legend { display: flex; margin-left: 0; }
 /* 下の余白は、最後の答えとページの下の注意書きを見分けるため広めに */
 .faq { padding-top: 8px; padding-bottom: 32px; }
 .faq-list { max-width: 40em; } /* 1行40字ほど。長くなると次の行の頭を見失いやすい */
-.faq-list h3 { margin: 0; padding-top: 16px; border-top: 1px solid var(--line); font-size: 18px; line-height: 1.5; } /* 18px：ほかの小見出し（.sub-title）とそろえる */
-.faq-list h3:not(:first-child) { margin-top: 20px; }
+.faq-list :is(h2, h3) { margin: 0; padding-top: 16px; border-top: 1px solid var(--line); font-size: 18px; line-height: 1.5; } /* 18px：ほかの小見出し（.sub-title）とそろえる */
+.faq-list :is(h2, h3):not(:first-child) { margin-top: 20px; }
+.policy .zukan-facts { gap: 10px 12px; font-size: 16px; line-height: 1.8; } /* プライバシーポリシー：長い文章なので本文と同じ16px。項目どうしのすき間を行間より広くして、次の項目を続きと見誤らないように */
 .faq-list p, .faq-list ul { margin: 8px 0 0; font-size: 16px; line-height: 1.8; } /* 長い文章なので本文と同じ16px */
 .faq-list p + p, .faq-list p + ul { margin-top: 12px; }
 .faq-list ul { padding-left: 1.5em; }
@@ -441,6 +442,8 @@ p.legend { display: flex; margin-left: 0; }
 .contact a { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; font-size: 16px; }
 /* 説明はリンクの次の行に分ける（同じ行に続けると、1行目だけ行の間が広く空き、どこまでがリンクか分かりにくい） */
 .contact-note { display: block; }
+.site-footer .policy-link { margin-top: 4px; }
+.policy-link a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; }
 .site-footer .is-old { color: var(--station); font-weight: 700; }
 
 @media (min-width: 960px) {
