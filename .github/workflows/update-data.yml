@@ -1,0 +1,96 @@
+# 軌道データを1日3回、自動で取り直して保存し、サイトを公開し直す
+# 本線に保存したときも、サイトを公開し直す
+# サイトに載せるのは画面に必要なファイルだけ（CLAUDE.md などの開発用のメモは、サイトのアドレスからは開けない。2026-10-02 オーナー判断）
+name: 軌道データの更新と公開
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 */8 * * *'
+  workflow_dispatch:
+
+# 公開が重ならないようにする（途中の公開は取り消さず、順番に行う）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    # 決まった時刻と、手で動かしたときだけ取り直す（本線への保存では取り直さない）
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（中身を固定）
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0（中身を固定）
+        with:
+          node-version: 22
+      - run: node scripts/update-data.mjs
+      - name: 変わっていれば保存
+        run: |
+          if git diff --quiet data/sats.json; then
+            echo "変更なし"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/sats.json
+            git commit -m "軌道データを更新"
+            git push
+          fi
+
+  # 地名検索（国土地理院）が動いているかを1日1回確かめる。長く提供される保証がないため（2015年の国土地理院の回答）。
+  # 止まっていたらこの段取りが失敗になり、GitHub からオーナーに知らせが届く。軌道データの更新と公開は止めない（別の段取り）
+  check-search:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: 地名検索が動いているか確かめる
+        run: |
+          # 決まった時刻に動いたときは1日1回だけ（日本時間の朝9時台の回）。手で動かしたときはいつでも
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%H)" -ge 8 ]; then echo "きょうは確認済み"; exit 0; fi
+          res=$(curl -sS --max-time 30 'https://msearch.gsi.go.jp/address-search/AddressSearch?q=%E5%AF%8C%E5%A3%AB%E5%B1%B1')
+          echo "$res" | head -c 300; echo
+          echo "$res" | python3 -c 'import json,sys; d=json.load(sys.stdin); assert isinstance(d,list) and len(d)>0 and "geometry" in d[0] and "title" in d[0]["properties"]' \
+            || { echo "地名検索（国土地理院）から、いつもの形の答えが返ってきません。サイトで地名を探せなくなっているおそれがあります"; exit 1; }
+
+  deploy:
+    needs: update
+    # 取り直しを行わなかった（本線への保存）ときも公開する。取り直しに失敗したときは公開しない
+    if: ${{ !failure() && !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # 上で保存した最新のデータを使うため、本線の最新を取り出す
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1（中身を固定）
+        with:
+          ref: main
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0（中身を固定）
+        with:
+          node-version: 22
+      # 宇宙ステーションのページを、予報のページから作り直す（作り直し忘れで画面がずれないように）。
+      # 作り直しに失敗したら公開は止まる（前に公開したものが残る。軌道データが3日より古くなると画面に「古い」と出る）
+      - name: 宇宙ステーションのページを作る
+        run: node scripts/build-stations.mjs
+      - name: サイトに載せるファイルだけを集める
+        run: |
+          mkdir -p _site/lib _site/img/sats
+          cp index.html zukan.html iss.html tiangong.html 404.html robots.txt sitemap.xml favicon.svg favicon.ico apple-touch-icon.png _site/
+          cp -r css js data _site/
+          cp lib/satellite.min.js lib/satellite.js-LICENSE.md _site/lib/
+          cp img/sats/*.jpg _site/img/sats/
+          cp img/ogp.png _site/img/
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0（中身を固定）
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0（中身を固定）
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1（中身を固定）

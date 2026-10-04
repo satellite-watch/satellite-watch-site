@@ -1,0 +1,14 @@
+{
+  "name": "satellite-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "update-data": "node scripts/update-data.mjs",
+    "build-stations": "node scripts/build-stations.mjs",
+    "build-lib": "esbuild scripts/lib-entry.js --bundle --format=esm --minify --outfile=lib/satellite.min.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "satellite.js": "7.1.0"
+  }
+}

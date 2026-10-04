@@ -1,0 +1,223 @@
+<!doctype html>
+<!-- このファイルは scripts/build-stations.mjs で index.html から作っています。直接は直さず、index.html か scripts/build-stations.mjs を直して npm run build-stations で作り直す -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>天宮（中国の宇宙ステーション）が見える時間と方角 | 人工衛星みえる予報</title>
+<meta name="description" content="中国の宇宙ステーション「天宮」が、日本のあなたの街からいつ・どの方角に見えるかを、地図と空の図で調べられます。今夜から7夜分の予報です。">
+<!-- 色は css/style.css の --bg と同じ値にする（ここは仕組み上、変数が使えない） -->
+<link rel="canonical" href="https://satellite-watch.jp/tiangong.html">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- SNS で共有したときに出る題名・説明・画像（画像は img/src/ogp.svg から scripts/build-images.py で作る） -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="人工衛星みえる予報">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="天宮（中国の宇宙ステーション）が見える時間と方角 | 人工衛星みえる予報">
+<meta property="og:description" content="中国の宇宙ステーション「天宮」が、日本のあなたの街からいつ・どの方角に見えるかを、地図と空の図で調べられます。今夜から7夜分の予報です。">
+<meta property="og:url" content="https://satellite-watch.jp/tiangong.html">
+<meta property="og:image" content="https://satellite-watch.jp/img/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="星空に描いた空の図を、人工衛星の通り道が横切る絵">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b1020">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-sat="48274">
+<header class="site-header">
+  <div class="wrap">
+    <p class="site-title"><a class="site-title-link" href="index.html">人工衛星みえる予報</a></p>
+    <p class="site-lead">場所と日時を選ぶと、肉眼で見えることがある人工衛星（約160機）の時間と方角がわかります。</p>
+    <nav class="site-nav" aria-label="ページの切り替え">
+      <a href="index.html" aria-current="true">予報</a>
+      <a href="zukan.html">衛星図鑑</a>
+    </nav>
+  </div>
+</header>
+
+<nav class="jump" aria-label="ページ内の移動">
+  <a href="#view">地図</a>
+  <a href="#passes">見える時間</a>
+  <a href="#sky">空の図</a>
+</nav>
+
+<main>
+<section class="wrap station-intro" aria-labelledby="h-station">
+  <h1 id="h-station" class="station-title">天宮（中国の宇宙ステーション）が見える時間</h1>
+  <p class="station-lead">場所を選ぶと、中国の宇宙ステーション「天宮」が今夜から7夜のうち、いつ・どの方角に見えるかがわかります。低い空を通る回も含めて出しています。</p>
+</section>
+<div class="wrap layout">
+  <section id="controls" class="card controls is-collapsed" aria-labelledby="h-controls">
+    <h2 id="h-controls" class="card-title">場所と日時</h2>
+    <p id="place-notice" class="notice" hidden>いまは仮に<strong>東京（千代田区）</strong>で表示しています。見る場所を選んでください。</p>
+    <div class="controls-summary">
+      <p><strong id="sum-place">—</strong><br><span id="sum-time"></span><span id="sum-msg" class="sum-msg"></span></p>
+      <button type="button" id="controls-toggle" class="btn btn-ghost" aria-expanded="false" aria-controls="controls-body">変える</button>
+    </div>
+    <div id="controls-body" class="controls-grid">
+      <form id="place-form" class="field" autocomplete="off">
+        <label for="place-input" class="label">場所（地名・駅名・山の名前など）</label>
+        <div class="row">
+          <input id="place-input" type="search" placeholder="例：東京都、富士山" enterkeyhint="search">
+          <button type="submit" class="btn">探す</button>
+          <button type="button" id="geo-btn" class="btn btn-ghost">現在地</button>
+        </div>
+        <ul id="place-results" class="place-results" hidden></ul>
+        <p id="place-msg" class="msg" role="status"></p>
+        <p class="current-place">選んでいる場所：<strong id="place-name">—</strong></p>
+      </form>
+
+      <div class="field">
+        <label for="time-input" class="label">日時（日本時間）</label>
+        <div class="row">
+          <input id="time-input" type="datetime-local" step="60">
+          <button type="button" id="now-btn" class="btn btn-ghost">今</button>
+        </div>
+        <p id="time-msg" class="msg" role="status"></p>
+        <p class="hint">今夜から7夜分（今日から7日先の朝まで）の予報を出します。先の日付を選ぶと、その分短くなります。先の日付ほど、時刻が数分ずれることがあります。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="view" class="card mapview" aria-labelledby="h-view">
+    <h2 id="h-view" class="card-title">衛星の位置の地図</h2>
+    <p id="view-caption" class="view-caption">軌道データを読み込んでいます…</p>
+    <div id="view-next" class="view-next" hidden><button type="button" id="next-btn" class="btn btn-ghost btn-next is-off">その時刻を見る</button></div>
+    <div class="colormode">
+      <span id="colormode-label">色分け：</span>
+      <div class="seg" role="group" aria-labelledby="colormode-label">
+        <button type="button" data-mode="vis" aria-pressed="true">見えるかどうか</button>
+        <button type="button" data-mode="country" aria-pressed="false">国別</button>
+      </div>
+      <button type="button" id="legend-toggle" class="btn btn-ghost legend-toggle" aria-expanded="false" aria-controls="legends">凡例<span id="legend-arrow" aria-hidden="true"> ▾</span></button>
+    </div>
+    <div id="legends" class="legends is-collapsed">
+      <p id="legend-vis" class="hint legend">
+        <span><i class="dot dot-observer"></i>選んでいる場所</span>
+        <span><i class="dot dot-station"></i>宇宙ステーション（見えるとき）</span>
+        <span><i class="dot dot-vis"></i>見える</span>
+        <span><i class="dot dot-shadow"></i>見えない</span>
+        <span><i class="dot dot-selected"></i>選んだ衛星</span>
+        <span><i class="line-track"></i>通り道</span>
+        <span><i class="ring-observer"></i>宇宙ステーションが入ってくると見える範囲の目安（ISS の高さで描いた目安）</span>
+      </p>
+      <p id="legend-country" class="hint legend" hidden>
+        <span><i class="dot dot-observer"></i>選んでいる場所</span>
+        <span><i class="dot dot-ru"></i>ロシア（旧ソ連）</span>
+        <span><i class="dot dot-us"></i>アメリカ</span>
+        <span><i class="dot dot-cn"></i>中国</span>
+        <span><i class="dot dot-jp"></i>日本</span>
+        <span><i class="dot dot-other"></i>その他（欧州・国際共同など）</span>
+        <span><i class="dot dot-big"></i>大きい点＝見える</span>
+        <span><i class="dot dot-small"></i>小さい点＝見えない</span>
+        <span><i class="dot dot-selected"></i>選んだ衛星</span>
+        <span><i class="line-track"></i>通り道</span>
+        <span><i class="ring-observer"></i>宇宙ステーションが入ってくると見える範囲の目安（ISS の高さで描いた目安）</span>
+      </p>
+    </div>
+    <div id="map" aria-label="衛星の位置の地図"></div>
+    <p class="hint map-zoom-hint">拡大・縮小は、地図の左上の＋−ボタンで（ダブルクリックでも拡大できます）。</p>
+
+    <div class="timebar">
+      <button type="button" id="play-btn" class="btn btn-ghost" aria-label="時間を進める">▶︎</button>
+      <input id="time-slider" type="range" min="-180" max="180" step="1" value="0" aria-label="時刻を前後に動かす">
+      <span id="slider-time" class="slider-time"></span>
+    </div>
+  </section>
+
+  <section id="passes" class="card passes" aria-labelledby="h-passes">
+    <h2 id="h-passes" class="card-title" tabindex="-1">衛星が見える時間</h2>
+    <div id="sat-only" class="sat-only" hidden>
+      <p><b id="sat-only-name"></b>の見える時間だけを表示中<span id="sat-only-low">（低い回も含みます）</span><span id="sat-only-none" class="sat-only-none" hidden></span></p>
+      <a id="sat-only-clear" class="btn btn-ghost" href="index.html">ほかの衛星も見る</a>
+    </div>
+    <div id="night-tabs" class="night-tabs" role="group" aria-label="日付"></div>
+    <div class="filters" role="group" aria-label="絞り込み">
+      <label class="chip" hidden><input type="checkbox" id="only-big" checked><span><b class="chip-title">明るい衛星だけ</b><small class="chip-sub">街中でも見つけやすい約40機</small></span></label>
+      <label class="chip"><input type="checkbox" id="only-easy" checked><span><b class="chip-title">見やすい回だけ</b><small class="chip-sub">高さ25°以上を通る</small></span></label>
+      <label class="chip" hidden><input type="checkbox" id="only-stations"><span><b class="chip-title">宇宙ステーションだけ</b><small class="chip-sub">ISS・天宮（とても明るい）</small></span></label>
+    </div>
+    <ul class="notice notice-list">
+      <li>下の一覧から見たい時間を押すと、「地図で通り道を見る」ボタンが出ます。</li>
+      <li id="notice-station">宇宙ステーションはとても明るいので、25°以上の回も出します。</li>
+    </ul>
+    <p id="data-warn" class="warn" hidden></p>
+    <p id="passes-status" class="msg" role="status">軌道データを読み込んでいます…</p>
+    <ol id="pass-list" class="pass-list"></ol>
+    <button type="button" id="to-top" class="btn to-top" aria-label="見える時間の先頭へ" hidden>↑ 先頭へ</button>
+  </section>
+
+  <section id="sky" class="card skyview" aria-labelledby="h-sky">
+    <h2 id="h-sky" class="card-title" tabindex="-1">空の図</h2>
+    <p id="sky-caption" class="view-caption"></p>
+    <figure class="sky">
+      <svg id="sky-svg" viewBox="-176 -176 352 352" role="img" aria-labelledby="sky-title"><title id="sky-title">空の図</title></svg>
+      <div id="sky-tip" class="sky-tip" hidden></div>
+      <figcaption class="hint">円の中心が真上、ふちが地平線です。地面に置いた地図と同じ向き（北が上・東が右）です。見上げるときは、東西が左右逆になります。点に合わせる（スマホはタップする）と衛星名が出ます。<span class="legend"><span><i class="dot dot-station"></i>宇宙ステーション（見えるとき）</span><span><i class="dot dot-vis"></i>見える</span><span><i class="dot dot-shadow"></i>見えない（影に入っている・低すぎる）</span><span><i class="dot dot-selected"></i>選んだ衛星</span><span><i class="line-track"></i>通り道（三角の向きに進む）</span></span></figcaption>
+    </figure>
+
+    <h3 class="sub-title">この時刻に空に出ている衛星</h3>
+    <ul id="sky-list" class="sky-list"><li>軌道データを読み込んでいます…</li></ul>
+    <button type="button" id="sky-top" class="btn to-top" aria-label="空の図の先頭へ" hidden>↑ 先頭へ</button>
+  </section>
+</div>
+
+  <section id="about" class="wrap faq" aria-labelledby="h-about">
+    <h2 id="h-about" class="card-title">天宮（中国の宇宙ステーション）について</h2>
+    <div class="faq-list">
+      <h3>どんな施設？</h3>
+      <p>中国が運用している宇宙ステーションです。中心となる「天和」（2021年打ち上げ）に、実験施設の「問天」と「夢天」がつながった T 字形で、2022年11月に基本の形ができあがりました。</p>
+      <p>このサイトの軌道データでは、地上から約390kmの高さを、約90分で地球を1周しています。通り道は北緯41〜42度あたりまでで、それより北の地域では真上を通りません。ただ、札幌からも、南寄りの空の高いところを通る回があります。</p>
+
+      <h3>どう見える？</h3>
+      <p>ISS と同じく、太陽の光を反射して、空をすーっと動く光として見えます。見えるのは主に日の入り後と日の出前で、見える回のない日が何日も続くこともあります。空の途中で急に現れたり消えたりするのは、地球の影から出入りするためです。</p>
+
+      <h3>ほかの予報も見たいときは</h3>
+      <p>このサイトでは、<a href="iss.html">ISS（国際宇宙ステーション）が見える時間</a>や、<a href="index.html">ほかの人工衛星もまとめた予報</a>も見られます。見え方の疑問は<a href="index.html#faq">よくある質問</a>にまとめています。</p>
+
+      <p class="about-src">出典：<a href="https://www.astroarts.co.jp/article/hl/a/12747_css" target="_blank" rel="noopener">アストロアーツ「中国宇宙ステーションが完成」</a>、軌道データ＝<a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="page-jump"><a class="btn btn-ghost" href="zukan.html">衛星図鑑を見る<span aria-hidden="true">→</span></a></p>
+    <p class="station-links"><span>宇宙ステーションだけの予報：</span><a href="iss.html">ISS（国際宇宙ステーション）</a><b aria-current="page">天宮（中国）</b></p>
+    <p id="data-age"></p>
+    <p>対象は、肉眼で見えることがある人工衛星（宇宙ステーションを含む）です。すべての人工衛星を予報しているわけではありません。</p>
+    <p>出典：地図＝<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>（淡色地図、国土地理院）の色を加工して作成／地名検索・市区町村名＝国土地理院／軌道データ＝<a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a>（もとは米国宇宙軍が <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> で公開しているデータ）／計算＝satellite.js（MITライセンス）</p>
+    <p>予報は計算による目安です。天気や建物、街の明るさによっては見えないことがあります。</p>
+    <p class="contact"><a href="https://forms.gle/ULYB9ghzvGdWSWb76" target="_blank" rel="noopener">お問い合わせ<span aria-hidden="true">↗︎</span><span class="sr-only">（別のタブで開きます）</span></a><span class="contact-note">広告掲載のご相談、予報や説明の誤りのご連絡など。別のタブで Google フォームが開きます。</span></p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="module" src="js/app.js"></script>
+<script>
+  // 計算部分が動かなかったとき、「計算しています…」のまま止まらず理由を出す
+  (function () {
+    function fail(text) {
+      ['passes-status', 'place-msg'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) { el.textContent = text; el.className = 'msg is-error'; }
+      });
+      // 動かないまま「探す」を押しても、ページが読み込み直されるだけにならないようにする
+      var form = document.getElementById('place-form');
+      if (form) form.addEventListener('submit', function (e) { e.preventDefault(); });
+    }
+    if (location.protocol === 'file:') {
+      fail('このページは、ファイルを直接開くと動きません。https://satellite-watch.jp/ を開いてください。');
+      return;
+    }
+    setTimeout(function () {
+      if (!window.__appStarted) fail('読み込めませんでした。ページを読み込み直してください。古いブラウザでは動かないことがあります。');
+    }, 10000);
+  })();
+</script>
+</body>
+</html>

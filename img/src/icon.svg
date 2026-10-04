@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- サイトのアイコン：空の図（円）を横切る衛星の通り道。色は css/style.css の :root と同じ値。
+       16px でも通り道が弧に見えるよう、線は透かさず太め、衛星の点は紺で縁取る -->
+  <rect width="64" height="64" rx="14" fill="#0b1020"/>
+  <circle cx="32" cy="32" r="23" fill="#0e1630" stroke="#6474a3" stroke-width="3.5"/>
+  <path d="M11 41 Q24 15 46 17" fill="none" stroke="#ffd35a" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="46" cy="17" r="7" fill="#ffd35a" stroke="#0b1020" stroke-width="2"/>
+</svg>

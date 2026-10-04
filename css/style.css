@@ -1,0 +1,516 @@
+/* 夜に外で見る前提の暗い配色。色はここの変数だけで決める */
+:root {
+  --bg: #0b1020;
+  --surface: #131a2e;
+  --surface-2: #1c2542;
+  --line: #2c3860;          /* カードの外枠・区切り線 */
+  --line-strong: #6474a3;   /* 押せる部品の枠・空の図の円（背景との比 3:1 以上） */
+  --text: #eef1f8;
+  --text-dim: #b3bcd4;
+  --accent: #ffd35a;       /* 見える衛星 */
+  --accent-ink: #1a1400;   /* 黄色の上の文字 */
+  --station: #ff9f5a;      /* 宇宙ステーション */
+  --link: #8fcbff;
+  --shadow-sat: #7d88a8;   /* 影に入っている衛星 */
+  --observer: #5ee0b0;     /* 観測地 */
+  --sky: #0e1630;          /* 空の図・地図の下地 */
+  --white: #ffffff;
+  /* 地図の国別の色分け（色の見分けが苦手な人にも区別しやすい Okabe-Ito の配色から） */
+  --c-ru: #56b4e9;
+  --c-us: #e69f00;
+  --c-cn: #f0e442;
+  --c-jp: #cc79a7;
+  --c-other: #b3bcd4;
+  --focus: #8fcbff;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 4px;
+  --gap: 16px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+/* 画面には出さず、読み上げだけで伝える文字 */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+a { color: var(--link); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+.site-header { padding: 20px 0 8px; }
+.site-title { margin: 0; font-size: 26px; font-weight: 700; line-height: 1.3; letter-spacing: .02em; } /* 図鑑では h1 でなく p なので、太字を明示する */
+/* 図鑑のページのサイト名は、予報のページへのリンク（見た目は予報のページの大見出しと同じ） */
+.site-title-link { color: inherit; text-decoration: none; }
+.site-title-link:hover { text-decoration: underline; }
+.site-lead { margin: 4px 0 0; color: var(--text-dim); font-size: 15px; }
+/* ページの切り替え（予報のページ／衛星図鑑）。下線だけのタブの形にして、丸いボタンの「ページ内の移動」と見分ける。
+   いまいるページは黄色の下線と太字で示す */
+.site-nav { display: flex; gap: 8px; margin-top: 12px; border-bottom: 1px solid var(--line); }
+.site-nav a {
+  min-height: 44px; padding: 0 14px; display: flex; align-items: center; text-decoration: none;
+  color: var(--text-dim); font-size: 16px; border-bottom: 3px solid transparent; margin-bottom: -1px; /* 本文と同じ16px */
+}
+.site-nav a[aria-current] { color: var(--text); border-bottom-color: var(--accent); font-weight: 700; }
+/* スマホ：地図を早く見せるため、上の余白を詰める */
+@media (max-width: 599px) {
+  .site-header { padding-top: 12px; }
+  .site-nav { margin-top: 4px; }
+}
+/* スマホ：地図を早く見せるため、説明文は出さない */
+@media (max-width: 599px) { .site-lead { display: none; } }
+
+/* スマホ：ページ内移動 */
+.jump {
+  position: sticky; top: 0; z-index: 1000;
+  display: flex; gap: 8px; padding: 8px 16px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.jump a {
+  flex: 1; text-align: center; text-decoration: none;
+  min-height: 44px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  color: var(--text); font-size: 15px; background: var(--surface);
+}
+
+.layout {
+  display: grid; gap: 32px var(--gap); padding-top: 16px; padding-bottom: 24px;
+  grid-template-areas: "controls" "map" "passes" "sky";
+  grid-template-columns: minmax(0, 1fr);
+}
+.controls { grid-area: controls; }
+.mapview { grid-area: map; }
+.passes { grid-area: passes; }
+.skyview { grid-area: sky; }
+.mapview, .passes, .skyview, .faq { scroll-margin-top: 72px; }
+/* カードは入力する「場所と日時」だけ。見る部分（地図・一覧・空の図）は枠なしにそろえる */
+.card.mapview, .card.passes, .card.skyview { background: transparent; border: 0; padding: 0; }
+.controls-grid { display: grid; gap: 0 24px; grid-template-columns: minmax(0, 1fr); } /* minmax(0, …)：日時の欄の最小幅に押されて、カードから右へはみ出さないようにする */
+/* スマホ：地図を早く見せるため、場所と日時は要約だけにしておき「変える」で開く */
+.controls-summary { display: flex; align-items: center; gap: 12px; }
+.controls-summary p { flex: 1; min-width: 0; margin: 0; font-size: 15px; line-height: 1.5; color: var(--text-dim); }
+.controls-summary strong { color: var(--text); font-size: 16px; }
+.controls:not(.is-collapsed) .controls-summary { margin-bottom: 12px; }
+.controls.is-collapsed .controls-grid { display: none; }
+.controls .current-place { display: none; } /* スマホは要約に場所が出ているので出さない */
+.controls.is-collapsed .card-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.controls-grid .field { margin-bottom: 0; }
+.controls-grid .field + .field { margin-top: 12px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  min-width: 0;
+}
+.card-title { margin: 0 0 12px; font-size: 22px; line-height: 1.4; }
+.sub-title { margin: 20px 0 8px; font-size: 18px; line-height: 1.4; }
+
+.field { margin-bottom: 12px; }
+.label { display: block; font-size: 15px; margin-bottom: 4px; color: var(--text); }
+.row { display: flex; gap: 8px; }
+.row > input { flex: 1; min-width: 0; }
+input[type="search"], input[type="datetime-local"] {
+  min-height: 48px; padding: 8px 12px;
+  font: inherit; font-size: 16px; color: var(--text);
+  background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+}
+.hint { margin: 6px 0 0; font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+.msg { margin: 8px 0 0; font-size: 15px; color: var(--text-dim); }
+.msg:empty { display: none; }
+.msg.is-error { color: var(--text); }
+/* \FE0E：iPhone で絵文字（黄色い三角）にならないようにする */
+.msg.is-error::before, .sum-msg:not(:empty)::before, .warn::before { content: "\26A0\FE0E  "; color: var(--station); }
+.sum-msg { display: block; color: var(--text); }
+/* 箇条書きの案内（「衛星が見える時間」の使い方） */
+.notice.notice-list { padding-left: 28px; line-height: 1.6; }
+.notice-list li + li { margin-top: 4px; }
+.notice { margin: 0 0 12px; padding: 8px 12px; font-size: 15px; color: var(--text); border-left: 3px solid var(--link); background: var(--surface-2); }
+.warn { margin: 8px 0 0; padding: 6px 10px; font-size: 15px; color: var(--text); border-left: 3px solid var(--station); background: var(--surface-2); }
+
+.btn {
+  min-height: 48px; min-width: 64px; padding: 8px 16px;
+  font: inherit; font-size: 16px; font-weight: 600;
+  color: var(--accent-ink); background: var(--accent);
+  border: 1px solid var(--accent); border-radius: var(--radius-sm); cursor: pointer;
+}
+.btn-ghost { color: var(--text); background: transparent; border-color: var(--line-strong); font-weight: 500; }
+.btn:disabled { opacity: .5; cursor: default; }
+/* リンクをボタンの形で出すとき（下線を消し、文字を上下左右の中央に） */
+a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+
+.place-results { list-style: none; margin: 8px 0 0; padding: 0; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); overflow: hidden; }
+.place-results button {
+  width: 100%; min-height: 44px; padding: 8px 12px; text-align: left;
+  font: inherit; font-size: 15px; color: var(--text); background: var(--surface-2);
+  border: 0; border-bottom: 1px solid var(--line); cursor: pointer;
+}
+.place-results li:last-child button { border-bottom: 0; }
+.place-results button:hover { background: var(--line); }
+
+.current-place { margin: 8px 0 0; font-size: 15px; color: var(--text-dim); }
+.current-place strong { color: var(--text); font-size: 16px; }
+
+/* 夜ごとのタブ（横スクロールにせず、折り返して全部見せる） */
+.night-tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.night-tab {
+  width: 100%; min-height: 48px; padding: 6px 8px; text-align: center;
+  font: inherit; font-size: 15px; line-height: 1.3; color: var(--text);
+  background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 999px; cursor: pointer;
+}
+.night-tab[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.night-tab small { display: block; font-size: 13px; opacity: .9; }
+
+/* 図鑑から来たとき：その衛星の回だけを出していることと、解除ボタン。いつも出る説明（.notice）と見分けるため、黄色（＝選んでいるもの）の帯の箱にする */
+.sat-only { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--line-strong); border-left: 4px solid var(--accent); border-radius: var(--radius-sm); }
+.sat-only[hidden] { display: none; }
+.sat-only p { flex: 1; min-width: 0; margin: 0; font-size: 15px; line-height: 1.6; }
+.sat-only p b { font-size: 16px; }
+.sat-only-none { display: block; margin-top: 2px; font-weight: 700; }
+.sat-only-none[hidden] { display: none; }
+.msg.is-notice { color: var(--text); }
+@media (max-width: 359px) { .sat-only { flex-wrap: wrap; } .sat-only .btn { width: 100%; } }
+.sat-only .btn { flex: none; min-width: 0; font-size: 15px; }
+/* 1つずつ横幅いっぱいに縦に並べ、名前と説明がそれぞれ1行に収まるようにする */
+.filters { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-bottom: 12px; }
+.chip { position: relative; display: flex; }
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+/* 絞り込みは2行：1行目が名前、2行目が短い説明（どの説明がどのボタンのものか迷わないように） */
+.chip span {
+  flex: 1; display: grid; grid-template-columns: 20px minmax(0, 1fr); column-gap: 10px; row-gap: 2px; align-content: center;
+  min-height: 52px; padding: 6px 14px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-dim);
+}
+/* 左の四角い印：選んでいないときは空、選んだときは✓入り（色だけでなく形でも見分けられるように） */
+.chip span::before {
+  content: ""; grid-row: 1 / 3; align-self: center; width: 20px; height: 20px; box-sizing: border-box;
+  border: 2px solid var(--line-strong); border-radius: var(--radius-xs);
+}
+.chip-title, .chip-sub { grid-column: 2; }
+.chip-title { font-size: 15px; font-weight: 600; line-height: 1.3; }
+.chip-sub { font-size: 13px; line-height: 1.4; }
+.chip:hover input:not(:checked) + span { background: var(--surface-2); }
+.chip input:checked + span { color: var(--text); border-color: var(--link); background: color-mix(in srgb, var(--link) 18%, transparent); }
+.chip input:checked + span::before {
+  content: "✓"; background: var(--link); border-color: var(--link); color: var(--bg);
+  font-size: 14px; font-weight: 700; line-height: 16px; text-align: center;
+}
+.chip input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 3px; } /* 選んだときの青い枠と二重に見えないよう少し離す */
+
+/* 「上へ戻る」：一覧の右下に貼り付く（一覧を下へ送って日付タブや絞り込みが隠れたときだけ出す） */
+.to-top {
+  /* 下から24px：iPhone の画面下端の操作の帯（ホームバー）にかかりにくくする */
+  position: sticky; bottom: 24px; display: block; width: max-content; margin: 12px 0 0 auto;
+  color: var(--text); background: var(--surface-2); border-color: var(--line-strong);
+  font-size: 15px; font-weight: 400; /* 選んでいない日付タブと同じ形・色。文字は上部の移動ボタンと同じ大きさ */
+  border-radius: 999px;
+  /* 地の色の輪で一覧の札から切り離し、札の上に重なっても溶け込まないようにする */
+  box-shadow: 0 0 0 4px var(--bg), 0 4px 12px color-mix(in srgb, var(--bg) 80%, transparent);
+}
+.to-top[hidden] { display: none; }
+#h-passes:focus, #h-sky:focus { outline: none; } /* 戻ったときに見出しへ操作位置を移すだけなので、枠は出さない */
+#h-passes:focus-visible, #h-sky:focus-visible { outline: 3px solid var(--focus); }
+/* 回と回の間を広めに取り、1件ずつ区切って読みやすくする */
+.pass-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 16px; }
+.pass {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  padding: 12px 14px; font: inherit; color: var(--text);
+  background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+}
+.pass:hover { border-color: var(--link); }
+.pass[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.pass-when { display: block; font-size: 14px; color: var(--text-dim); line-height: 1.4; }
+.pass-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.pass-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pass-name { font-size: 16px; font-weight: 600; }
+.filters .chip[hidden] { display: none; } /* 宇宙ステーションのページで、効き目のない絞り込みを隠す */
+.tag { display: inline-block; white-space: nowrap; font-size: 13px; line-height: 1.4; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-dim); }
+.tag-station { color: var(--accent-ink); background: var(--station); border-color: var(--station); font-weight: 700; }
+.tag-big { color: var(--text); border-color: var(--station); font-weight: 700; }
+/* 「見やすい」：絞り込みの「見やすい回だけ」を選んだときと同じ水色のふち（「明るい」の橙と見分ける） */
+.tag-easy { color: var(--text); border-color: var(--link); font-weight: 700; }
+/* 「短い」：注意の目印。色のふちは使わず、点線で「見やすい」「明るい」と見分ける */
+.tag-short { color: var(--text); border: 1px dashed var(--text-dim); font-weight: 700; } /* 夜のスマホでも点線が見えるよう明るい灰色。この回の判定なので、ほかの判定の目印と同じ太字 */
+.pass-origin { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 4px; font-size: 14px; color: var(--text-dim); }
+.tip-origin { color: var(--text-dim); font-size: 13px; }
+.pass-purpose { display: block; margin-top: 2px; font-size: 14px; color: var(--text-dim); line-height: 1.5; }
+.pass-route { margin: 6px 0 0; font-size: 15px; color: var(--text-dim); line-height: 1.6; }
+.pass-route b { color: var(--text); font-weight: 600; }
+/* 選んだ回の札のすぐ下に出す「地図で通り道を見る」。札と同じ幅にして、札の続きに見せる */
+.pass-map { display: block; width: 100%; margin-top: 8px; }
+/* 図鑑に画像がある衛星だけに出す「図鑑で画像を見る」（新しいタブで開く） */
+/* 押せる範囲は文字のまわりだけ（横幅いっぱいにすると、一覧を指で送るときに触れて開いてしまう） */
+.pass-zukan { display: flex; align-items: center; justify-content: center; width: fit-content; min-height: 44px; margin: 4px auto 0; padding: 0 12px; font-size: 15px; color: var(--link); }
+
+.view-caption { margin: 0 0 8px; font-size: 16px; }
+/* 「その時刻を見る」：回を選んでいないあいだは、ボタンがなくても場所を取っておく（地図が上下に動かないように） */
+.view-next { margin: 0 0 12px; min-height: 48px; }
+.btn-next { font-size: 15px; }
+.btn-next.is-off { visibility: hidden; }
+.view-caption .hint b { color: var(--text); white-space: nowrap; } /* 案内の中の時刻を目立たせ、途中で改行しない */
+.skyview .view-caption { margin-top: -4px; }
+/* 地図はホイールで拡大・縮小しないので、マウスで操作する画面にだけ操作のしかたを添える */
+.map-zoom-hint { display: none; margin-top: 4px; }
+@media (hover: hover) and (pointer: fine) { .map-zoom-hint { display: block; } }
+.timebar { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; }
+.timebar .btn { min-width: 48px; padding: 8px; }
+#time-slider { flex: 1; min-width: 0; height: 44px; accent-color: var(--accent); }
+.slider-time { font-variant-numeric: tabular-nums; font-size: 15px; min-width: 7.5em; text-align: right; }
+
+.sky { margin: 0; position: relative; }
+.sky-tip {
+  position: absolute; z-index: 5; max-width: 240px; padding: 6px 10px;
+  font-size: 14px; line-height: 1.5; color: var(--text);
+  background: var(--surface); border: 1px solid var(--link); border-radius: 8px;
+  pointer-events: none;
+}
+.sky-hover { fill: none; stroke: var(--white); stroke-width: 2; }
+#sky-svg { display: block; width: 100%; max-width: 380px; margin: 0 auto; height: auto; }
+.sky-bg { fill: var(--sky); stroke: var(--line-strong); stroke-width: 2; }
+.sky-ring { fill: none; stroke: var(--line-strong); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.sky-dir { fill: var(--text); font-size: 17px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+.sky-deg { fill: var(--text-dim); font-size: 16px; paint-order: stroke; stroke: var(--sky); stroke-width: 3px; } /* 幅320pxで図が縮んでも12pxを下回らない大きさ */
+.sky-track { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.sky-dot-vis { fill: var(--accent); }
+.sky-dot-station { fill: var(--station); }
+.sky-dot-shadow { fill: var(--shadow-sat); }
+.sky-label { fill: var(--text); font-size: 16px; paint-order: stroke; stroke: var(--sky); stroke-width: 3px; }
+.sky-now { fill: var(--white); stroke: var(--accent); stroke-width: 3; }
+.sky-sel-shadow { fill: var(--shadow-sat); stroke: var(--accent); stroke-width: 3; }
+
+.legend { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; margin-left: 4px; }
+p.legend { display: flex; margin-left: 0; }
+.dot-observer { background: var(--observer); box-shadow: 0 0 0 2px var(--white); }
+.ring-observer { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 2px dashed var(--observer); margin-right: 4px; vertical-align: -2px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+.dot-vis { background: var(--accent); }
+.dot-shadow { background: var(--shadow-sat); }
+.dot-station { background: var(--station); }
+.dot-ru { background: var(--c-ru); }
+.dot-us { background: var(--c-us); }
+.dot-cn { background: var(--c-cn); }
+.dot-jp { background: var(--c-jp); }
+.dot-other { background: var(--c-other); }
+/* 大きさの見本は中を塗らない輪にして、「色の一種」と読まれないようにする */
+.dot-big { width: 12px; height: 12px; background: transparent; border: 2px solid var(--text); }
+.dot-small { width: 6px; height: 6px; background: transparent; border: 2px solid var(--text); }
+.dot-selected { background: var(--white); box-shadow: 0 0 0 2px var(--accent); }
+.line-track { display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: var(--accent); margin-right: 4px; vertical-align: 3px; }
+
+/* 地図の色分けの切り替え */
+.colormode { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 8px; font-size: 15px; }
+/* 地図の上の説明は、回を選ぶ・選ばないで行数が変わっても地図が上下にずれないよう、2行分の高さを取っておく */
+.mapview .view-caption { min-height: calc(1.7em + 2 * 1.6 * 14px); }
+/* 凡例の開け閉め：スマホでは地図が下がりすぎないよう、最初は閉じておく（PCは常に表示） */
+/* 隣の色分けの切り替えと同じ、両端の丸い形。狭い画面で折り返しても右寄せでまとまって見えるように */
+.legend-toggle { min-width: 0; margin-left: auto; padding: 8px 12px; font-size: 15px; font-weight: 400; border-radius: 999px; }
+.legends { margin-bottom: 8px; }
+.legends.is-collapsed { display: none; }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 999px; }
+.seg button {
+  min-height: 48px; padding: 6px 12px; font: inherit; font-size: 15px; color: var(--text);
+  background: var(--surface-2); border: 0; cursor: pointer;
+}
+/* 角丸はボタン側に付ける（外側で切り落とすと、キーボード操作中の選択枠まで切れるため） */
+.seg button:first-child { border-radius: 999px 0 0 999px; }
+.seg button:last-child { border-radius: 0 999px 999px 0; }
+.seg button:focus-visible { position: relative; z-index: 1; }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent); font-weight: 700; }
+.legend[hidden] { display: none; }
+
+/* isolation：地図の中の重なり（＋−ボタンなど）を地図の枠の中に閉じ込め、上部の移動バーにかぶらせない */
+/* 地図が主役：スマホは画面の約6割、PCは高さ約560px */
+#map {
+  height: clamp(320px, 60vh, 560px);
+  height: clamp(320px, 60svh, 560px); /* iPhone の上下のバーが出ている状態の高さで測る（対応していない端末は上の行） */
+  border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--sky); isolation: isolate;
+}
+/* 地理院タイルを夜向けの暗い色に加工 */
+#map .leaflet-tile-pane { filter: invert(1) hue-rotate(190deg) brightness(.85) saturate(.6); }
+.leaflet-container { font: inherit; font-size: 13px; }
+/* 地図の部品を夜向けの色にそろえる（標準は白） */
+.leaflet-bar, .leaflet-touch .leaflet-bar { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); overflow: hidden; }
+.leaflet-bar a, .leaflet-touch .leaflet-bar a {
+  width: 44px; height: 44px; line-height: 44px; font-size: 22px;
+  background: var(--surface); color: var(--text); border-bottom: 1px solid var(--line-strong);
+}
+.leaflet-bar a:last-child, .leaflet-touch .leaflet-bar a:last-child { border-bottom: 0; }
+.leaflet-bar a:hover, .leaflet-bar a:focus { background: var(--surface-2); color: var(--text); }
+.leaflet-bar a.leaflet-disabled { background: var(--surface); color: var(--shadow-sat); }
+.leaflet-tooltip { background: var(--surface); color: var(--text); border: 1px solid var(--line-strong); box-shadow: none; font-size: 14px; }
+.leaflet-tooltip-top::before { border-top-color: var(--line-strong); }
+.leaflet-tooltip-bottom::before { border-bottom-color: var(--line-strong); }
+.leaflet-tooltip-left::before { border-left-color: var(--line-strong); }
+.leaflet-tooltip-right::before { border-right-color: var(--line-strong); }
+.leaflet-container .leaflet-control-attribution { background: color-mix(in srgb, var(--surface) 85%, transparent); color: var(--text-dim); }
+.leaflet-control-attribution a { color: var(--link); }
+.leaflet-tooltip.sat-label { padding: 0 6px; font-size: 13px; border-color: var(--line); }
+.leaflet-tooltip.sat-label::before { display: none; }
+
+.sky-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.sky-list li { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.sky-list li:last-child { border-bottom: 0; }
+.sky-list .nm { font-weight: 600; flex: 1 1 12em; }
+.sky-list .kind { display: block; font-size: 13px; font-weight: 400; color: var(--text-dim); }
+.sky-list .pos { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.state-vis { color: var(--accent); }
+.state-shadow, .state-daylight, .state-low { color: var(--text-dim); }
+
+/* よくある質問：読む文章なので、PCでも1行が長くなりすぎないよう幅を抑える。質問ごとに上へ区切り線 */
+/* 下の余白は、最後の答えとページの下の注意書きを見分けるため広めに */
+.faq { padding-top: 8px; padding-bottom: 32px; }
+.faq-list { max-width: 40em; } /* 1行40字ほど。長くなると次の行の頭を見失いやすい */
+.faq-list h3 { margin: 0; padding-top: 16px; border-top: 1px solid var(--line); font-size: 18px; line-height: 1.5; } /* 18px：ほかの小見出し（.sub-title）とそろえる */
+.faq-list h3:not(:first-child) { margin-top: 20px; }
+.faq-list p, .faq-list ul { margin: 8px 0 0; font-size: 16px; line-height: 1.8; } /* 長い文章なので本文と同じ16px */
+.faq-list p + p, .faq-list p + ul { margin-top: 12px; }
+.faq-list ul { padding-left: 1.5em; }
+
+/* ---------- 宇宙ステーションのページ（iss.html・tiangong.html） ---------- */
+/* 本文の先頭の大見出しと説明。地図を早く見せるため短くする */
+.station-intro { padding-top: 16px; }
+.station-title { margin: 0; font-size: 24px; line-height: 1.4; }
+.station-lead { margin: 6px 0 0; max-width: 40em; font-size: 16px; line-height: 1.7; color: var(--text-dim); }
+.faq-list .about-src { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.7; color: var(--text-dim); }
+@media (min-width: 600px) { .station-title { font-size: 28px; } } /* PC はサイト名（26px）より大きくし、このページの題名だと分かるように */
+/* スマホ：地図を早く見せるため、説明文は出さない（サイトの説明 .site-lead と同じ扱い） */
+@media (max-width: 599px) {
+  .station-intro { padding-top: 12px; }
+  .station-lead { display: none; }
+}
+/* 狭い画面：帯の文字が細い列に押し込まれないよう、リンクを下の段に回す（予報のページの「解除」は短いのでそのまま） */
+@media (max-width: 479px) {
+  body[data-sat] .sat-only { flex-wrap: wrap; }
+  body[data-sat] .sat-only p { flex-basis: 100%; }
+  body[data-sat] .sat-only .btn { margin-left: auto; }
+}
+/* ページの下の、宇宙ステーションのページへのリンク。指で押しやすいよう高さ44px・16px（お問い合わせと同じ） */
+.site-footer .station-links { display: flex; flex-wrap: wrap; align-items: center; column-gap: 16px; margin: 8px 0 12px; }
+.station-links a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; }
+/* いま見ているページ自身は、リンクにせず太字で示す */
+.station-links b { color: var(--text); font-size: 16px; }
+
+/* ---------- 見つからないページ（404.html） ---------- */
+.nf-links { display: grid; gap: 12px; max-width: 360px; margin-bottom: 24px; }
+.nf-links .btn { width: 100%; justify-content: space-between; }
+
+/* ---------- 衛星図鑑のページ ---------- */
+.zukan-main { padding-top: 16px; padding-bottom: 24px; }
+.zukan-lead { margin: 0 0 16px; font-size: 15px; color: var(--text-dim); }
+.zukan-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.zukan-list > li { display: flex; } /* 同じ段の札の高さをそろえる */
+.zukan-list > li { scroll-margin-top: 16px; }
+/* 衛星のページのリンクから来た衛星の札（選んだ回の札と同じ、黄色のふち） */
+.zukan-picked { margin: 0 0 2px; font-size: 13px; font-weight: 700; color: var(--accent); }
+.zukan-list > li.is-target .zukan-card { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+#zukan-status { margin: 0 0 12px; }
+.zukan-card { flex: 1; display: flex; flex-direction: column; margin: 0; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; }
+/* 画像は切り抜かず、3:2 の枠の中に全体を収める（枠の余りは空の色）。夜にまぶしくないよう少し暗くして出す（画像そのものは加工していない） */
+.zukan-photo { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; background: var(--sky); filter: brightness(.85); }
+.zukan-body { flex: 1; display: flex; flex-direction: column; padding: 12px 14px 14px; } /* ボタンを札の下端にそろえる */
+.zukan-name { margin: 0; font-size: 18px; line-height: 1.4; }
+.zukan-reg { margin: 2px 0 0; font-size: 13px; color: var(--text-dim); }
+.zukan-facts { margin: 8px 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: 15px; line-height: 1.6; }
+.zukan-facts dt { color: var(--text-dim); }
+.zukan-facts dd { margin: 0; }
+/* 「この衛星が見える時間を調べる」：札の下に横幅いっぱい（予報のページへ同じ画面で移る） */
+.zukan-go { display: flex; align-items: center; justify-content: center; margin-top: auto; text-decoration: none; font-size: 15px; }
+.zukan-cap { margin: 10px 0 12px; font-size: 13px; line-height: 1.5; color: var(--text-dim); }
+
+.site-footer { padding: 8px 0 32px; font-size: 14px; color: var(--text-dim); }
+.site-footer .wrap { border-top: 1px solid var(--line); padding-top: 16px; } /* 本文との境目 */
+.site-footer p { margin: 4px 0; }
+/* ページの下の、もう一方のページへの移動（上のタブまで戻らなくても移れるように） */
+.site-footer .page-jump { margin: 8px 0 16px; }
+/* 出典の小さなリンクと見分けるため、図鑑の「この衛星が見える時間を調べる」と同じ枠のボタンの形にする */
+.page-jump a { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; } /* gap：文字と矢印のあいだの空き（並べ方の都合で空白が消えるため） */
+/* お問い合わせ（Google フォーム）。指で押しやすいよう、リンクの高さを44pxにする */
+.site-footer .contact { margin-top: 16px; }
+.contact a { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; font-size: 16px; }
+/* 説明はリンクの次の行に分ける（同じ行に続けると、1行目だけ行の間が広く空き、どこまでがリンクか分かりにくい） */
+.contact-note { display: block; }
+.site-footer .is-old { color: var(--station); font-weight: 700; }
+
+@media (min-width: 960px) {
+  .jump { display: none; }
+  .layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "controls controls" "map map" "passes sky";
+    column-gap: 48px; /* 一覧と空の図はどちらも枠なしなので、間を広めに空けて区切る */
+    align-items: start;
+  }
+  .controls-grid { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+  .controls-summary { display: none; }
+  .controls .current-place { display: block; }
+  .controls.is-collapsed .controls-grid { display: grid; }
+  .controls.is-collapsed .card-title { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  .controls-grid .field + .field { margin-top: 0; }
+  #map { height: 560px; }
+  /* PC は地図の上を「説明（左）｜色分け（右）」の2列にし、凡例はその下に横幅いっぱいで1行に。縦を詰めて地図を上げる */
+  .mapview {
+    display: grid; column-gap: 24px;
+    grid-template-columns: minmax(0, 1fr) max-content; /* 色分けは中身の幅だけ。説明の欄を広くとる */
+    grid-template-areas: "title title" "caption cm" "caption next" "leg leg" "map map" "zoomhint zoomhint" "time time";
+    align-items: start;
+  }
+  .mapview .card-title { grid-area: title; }
+  .mapview .view-caption { grid-area: caption; }
+  .mapview .colormode { grid-area: cm; margin-top: 0; justify-self: end; } /* 地図の右端にそろえる */
+  .mapview .view-next { grid-area: next; justify-self: end; margin-bottom: 8px; }
+  .mapview .legends { grid-area: leg; }
+  .mapview .legends .legend { margin-top: 0; } /* 凡例を色分けの切り替えに近づける */
+  .mapview #map { grid-area: map; }
+  .mapview .map-zoom-hint { grid-area: zoomhint; }
+  .mapview .timebar { grid-area: time; }
+  /* PC は凡例を常に表示し、開け閉めのボタンは隠す */
+  .legend-toggle { display: none; }
+  .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* PCは2列にして、一覧が見える範囲を広げる */
+  .layout { row-gap: 24px; } /* 地図を少しでも上げるため、段と段の間を詰める */
+  .legends.is-collapsed { display: block; }
+  /* 一覧と空の図は、それぞれ画面の高さに収まる箱にして、中だけをスクロールできるようにする */
+  /* scroll-margin-top：上部の移動バーが無い幅なので、箱へ移動するときは貼り付く位置（16px）に合わせる */
+  .passes, .skyview { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; scroll-margin-top: 16px; }
+  /* 箱の端でキーボード操作中の選択枠（3px＋すき間2px）が切れないよう、内側に余白を取り、外側で打ち消して位置はそのまま */
+  .card.passes, .card.skyview { padding: 6px; margin: -6px -6px 0; }
+}
+
+/* スマホ */
+@media (max-width: 599px) {
+  /* 場所の欄は入力欄を1行使い、ボタンはその下に並べる */
+  #place-form .row { flex-wrap: wrap; }
+  #place-form .row > input { flex-basis: 100%; }
+  #place-form .row > .btn { flex: 1; }
+  /* 時刻の表示を上の行に出し、つまみを長くする */
+  .timebar { flex-wrap: wrap; }
+  .slider-time { order: -1; flex-basis: 100%; text-align: left; min-width: 0; }
+}
+
+/* PCでも幅が狭め（960〜1099px）だと、回を選んだときの案内が2行に折り返すので、説明に3行分の高さを取って地図がずれないようにする */
+@media (min-width: 960px) and (max-width: 1099px) {
+  .mapview .view-caption { min-height: calc(3 * 1.7em); }
+}
+
+/* 幅380px未満：「色分け：」の文字は読み上げ用だけにして、切り替えと凡例ボタンを1行に収める */
+@media (max-width: 379px) {
+  #colormode-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* とても狭い画面：入力欄とボタンを縦に並べ、欄の中身が切れないようにする */
+@media (max-width: 359px) {
+  .row { flex-wrap: wrap; }
+  .row > input { flex-basis: 100%; }
+  .row > .btn { flex: 1; }
+  .jump a { font-size: 14px; }
+}

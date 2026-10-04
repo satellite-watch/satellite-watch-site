@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- スマホのホーム画面用：角の丸めは端末側で付くので、四角いまま塗る。点の中心（46,18）は角で切れない位置 -->
+  <rect width="64" height="64" fill="#0b1020"/>
+  <circle cx="32" cy="32" r="22" fill="#0e1630" stroke="#6474a3" stroke-width="3.2"/>
+  <path d="M13 41 Q25 16 46 18" fill="none" stroke="#ffd35a" stroke-width="3.8" stroke-linecap="round"/>
+  <circle cx="46" cy="18" r="6" fill="#ffd35a" stroke="#0b1020" stroke-width="1.5"/>
+</svg>

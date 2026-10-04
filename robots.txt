@@ -1,0 +1,5 @@
+# 検索サイトや AI の検索にも、すべてのページを読んでもらう（2026-10-02 オーナー判断）
+User-agent: *
+Allow: /
+
+Sitemap: https://satellite-watch.jp/sitemap.xml
