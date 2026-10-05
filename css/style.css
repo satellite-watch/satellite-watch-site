@@ -60,12 +60,12 @@ a { color: var(--link); }
   color: var(--text-dim); font-size: 16px; border-bottom: 3px solid transparent; margin-bottom: -1px; /* 本文と同じ16px */
 }
 .site-nav a[aria-current] { color: var(--text); border-bottom-color: var(--accent); font-weight: 700; }
-/* スマホ：地図を早く見せるため、上の余白を詰める */
+/* スマホ：一覧と地図を早く見せるため、上の余白を詰める */
 @media (max-width: 599px) {
   .site-header { padding-top: 12px; }
   .site-nav { margin-top: 4px; }
 }
-/* スマホ：地図を早く見せるため、説明文は出さない */
+/* スマホ：一覧と地図を早く見せるため、説明文は出さない */
 @media (max-width: 599px) { .site-lead { display: none; } }
 
 /* スマホ：ページ内移動 */
@@ -96,7 +96,7 @@ a { color: var(--link); }
 /* カードは入力する「場所と日時」だけ。見る部分（地図・一覧・空の図）は枠なしにそろえる */
 .card.mapview, .card.passes, .card.skyview { background: transparent; border: 0; padding: 0; }
 .controls-grid { display: grid; gap: 0 24px; grid-template-columns: minmax(0, 1fr); } /* minmax(0, …)：日時の欄の最小幅に押されて、カードから右へはみ出さないようにする */
-/* スマホ：地図を早く見せるため、場所と日時は要約だけにしておき「変える」で開く */
+/* スマホ：一覧と地図を早く見せるため、場所と日時は要約だけにしておき「変える」で開く */
 .controls-summary { display: flex; align-items: center; gap: 12px; }
 .controls-summary p { flex: 1; min-width: 0; margin: 0; font-size: 15px; line-height: 1.5; color: var(--text-dim); }
 .controls-summary strong { color: var(--text); font-size: 16px; }
@@ -225,6 +225,8 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
   box-shadow: 0 0 0 4px var(--bg), 0 4px 12px color-mix(in srgb, var(--bg) 80%, transparent);
 }
 .to-top[hidden] { display: none; }
+/* スマホ・タブレットでは一覧が地図より上にあるので、「↑ 一覧の先頭へ」の出し入れで地図以下が60px動かないよう、隠れているときも場所を取っておく */
+@media (max-width: 959px) { #to-top[hidden] { display: block; visibility: hidden; } }
 #h-passes:focus, #h-sky:focus, #h-view:focus { outline: none; } /* 戻ったときに見出しへ操作位置を移すだけなので、枠は出さない */
 #h-passes:focus-visible, #h-sky:focus-visible, #h-view:focus-visible { outline: 3px solid var(--focus); }
 /* 回と回の間を広めに取り、1件ずつ区切って読みやすくする */
@@ -401,15 +403,15 @@ p.legend { display: flex; margin-left: 0; }
 #faq summary:hover h3 { text-decoration: underline; text-underline-offset: 4px; } /* PC：押せる行だと分かるように（上のタブと同じく下線で示す） */ /* 区切り線は details に付けるので、見出しの線と余白は外す */
 
 /* ---------- 宇宙ステーションのページ（iss.html・tiangong.html） ---------- */
-/* 本文の先頭の大見出しと説明。地図を早く見せるため短くする */
+/* 本文の先頭の大見出しと説明。一覧と地図を早く見せるため短くする */
 .station-intro { padding-top: 16px; }
-.station-title { margin: 0; font-size: 24px; line-height: 1.4; }
+.station-title { margin: 0; font-size: 26px; line-height: 1.4; } /* 下の「見える日と時刻」（22px）とはっきり差をつける */
 .nowrap { display: inline-block; } /* 「（中国の宇宙ステーション）」などを途中で改行しない */
 @media (max-width: 359px) { .station-title { font-size: 22px; } .station-title .nowrap { font-feature-settings: "palt"; } } /* 320px でも1行に収める（かっこを半分の幅に詰める） */
 .station-lead { margin: 6px 0 0; max-width: 40em; font-size: 16px; line-height: 1.7; color: var(--text-dim); }
 .faq-list .about-src { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.7; color: var(--text-dim); }
 @media (min-width: 600px) { .station-title { font-size: 28px; } } /* PC はサイト名（26px）より大きくし、このページの題名だと分かるように */
-/* スマホ：地図を早く見せるため、説明文は出さない（サイトの説明 .site-lead と同じ扱い） */
+/* スマホ：一覧と地図を早く見せるため、説明文は出さない（サイトの説明 .site-lead と同じ扱い） */
 @media (max-width: 599px) {
   .station-intro { padding-top: 12px; }
   .station-lead { display: none; }

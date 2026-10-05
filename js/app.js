@@ -86,9 +86,9 @@ function setPlace(p) {
   $('place-results').hidden = true;
   // 欄が開いたままなので、切り替わったことを一言で知らせる（#place-msg は読み上げにも伝わる）
   $('place-msg').classList.remove('is-error');
-  // スマホでは「地図を見る ↓」が欄のいちばん下にあり、小さい画面では画面の外になるので、ありかも伝える（PC は地図がすぐ下に見えている）
+  // スマホでは「見える時間を見る ↓」が欄のいちばん下にあり、小さい画面では画面の外になるので、ありかも伝える（PC は出さない）
   const small = !window.matchMedia('(min-width: 960px)').matches;
-  $('place-msg').textContent = `${p.name}の予報に切り替えました。日時も変えられます。${small ? '見える時間は、この欄のいちばん下の「見える時間を見る ↓」から。' : ''}`;
+  $('place-msg').textContent = `${p.name}の予報に切り替えました。日時も変えられます。${small ? '下の「見える時間を見る ↓」から一覧へ移れます。' : ''}`;
   $('to-list').hidden = false; // スマホだけに出る（CSS）。見える時間（一覧）へひと押しで移れるように
   state.selected = null;
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、新しい場所でその衛星が見える最初の夜を選び直す
@@ -151,9 +151,11 @@ function requestPasses() {
   state.reqId += 1;
   state.passes = [];
   state.computing = true;
-  renderNightTabs(); // 前の場所や日時の回数を出したままにしない（計算が終わるまで「…」）
-  $('pass-list').innerHTML = '';
-  $('passes-status').textContent = '計算しています…';
+  keepViewWhile(() => {
+    renderNightTabs(); // 前の場所や日時の回数を出したままにしない（計算が終わるまで「…」）
+    $('pass-list').innerHTML = '';
+    $('passes-status').textContent = '計算しています…';
+  });
   // 最後の夜も明け方まで計算する（途中で切れた夜を作らない）
   const keys = nightKeys();
   const end = nightNoon(keys[keys.length - 1]) + 86400000;
@@ -361,7 +363,17 @@ function updateSatOnlyBar() {
   $('sat-only-place').hidden = !state.firstVisit;
 }
 
-function renderPasses() {
+// スマホでは一覧が地図より上にあるので、一覧が画面より上に流れているときに作り直すと、長さが変わったぶん地図が上下に飛ぶ。
+// 地図（とその下）を見ているあいだは、見ている位置を保つ（2026-10-06 sat-designer の指摘。PC は一覧の箱の中だけが動くので関係ない）
+function keepViewWhile(fn) {
+  const passes = $('passes');
+  const keep = !boxScrolls(passes) && passes.getBoundingClientRect().bottom < BAR_H;
+  const before = keep ? $('view').getBoundingClientRect().top : 0;
+  fn();
+  if (keep) window.scrollBy({ top: $('view').getBoundingClientRect().top - before, behavior: 'instant' });
+}
+function renderPasses() { keepViewWhile(renderPassesInner); }
+function renderPassesInner() {
   const list = filteredPasses(state.night);
   const status = $('passes-status');
   status.classList.remove('is-error', 'is-notice');

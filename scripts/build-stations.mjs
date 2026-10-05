@@ -83,6 +83,8 @@ for (const s of STATIONS) {
   // 予報の中の1ページなので「予報」のタブを選んだ形で見せる（ただし、このページそのものではないので page ではなく true）
   h = swap(h, '<a href="index.html" aria-current="page">予報</a>', '<a href="index.html" aria-current="true">予報</a>');
   h = swap(h, '<main>\n', `<main>\n<section class="wrap station-intro" aria-labelledby="h-station">\n  <h1 id="h-station" class="station-title">${s.h1}</h1>\n  <p class="station-lead">${s.lead}</p>\n</section>\n`);
+  // 一覧の見出し：上の大見出し（「○○が見える時間」）と同じ言葉が続かないよう、このページでは「見える日と時刻」にする（2026-10-06 sat-designer の指摘）
+  h = swap(h, '<h2 id="h-passes" class="card-title" tabindex="-1">衛星が見える時間</h2>', '<h2 id="h-passes" class="card-title" tabindex="-1">見える日と時刻</h2>');
   // 「解除」の代わりに、ほかの衛星もまとめた予報へのリンク
   h = swap(h, '<button type="button" id="sat-only-clear" class="btn btn-ghost">解除</button>', '<a id="sat-only-clear" class="btn btn-ghost" href="index.html">ほかの衛星も見る</a>');
   // よくある質問の代わりに、その宇宙ステーションの説明（よくある質問は予報のページにリンクする）
