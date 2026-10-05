@@ -88,8 +88,8 @@ function setPlace(p) {
   $('place-msg').classList.remove('is-error');
   // スマホでは「地図を見る ↓」が欄のいちばん下にあり、小さい画面では画面の外になるので、ありかも伝える（PC は地図がすぐ下に見えている）
   const small = !window.matchMedia('(min-width: 960px)').matches;
-  $('place-msg').textContent = `${p.name}の予報に切り替えました。日時も変えられます。${small ? '地図は、この欄のいちばん下の「地図を見る ↓」から。' : ''}`;
-  $('to-map').hidden = false; // スマホだけに出る（CSS）。地図へひと押しで移れるように
+  $('place-msg').textContent = `${p.name}の予報に切り替えました。日時も変えられます。${small ? '見える時間は、この欄のいちばん下の「見える時間を見る ↓」から。' : ''}`;
+  $('to-list').hidden = false; // スマホだけに出る（CSS）。見える時間（一覧）へひと押しで移れるように
   state.selected = null;
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、新しい場所でその衛星が見える最初の夜を選び直す
   updateObserverOnMap(true);
@@ -1061,16 +1061,16 @@ async function start() {
     $('controls').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     $('place-input').focus({ preventScroll: true }); // すぐ打ち込めるように
   });
-  $('to-map').addEventListener('click', () => {
-    $('view').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
-    $('h-view').focus({ preventScroll: true });
+  $('to-list').addEventListener('click', () => {
+    $('passes').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+    $('h-passes').focus({ preventScroll: true });
   });
   $('controls-toggle').addEventListener('click', () => {
     const open = $('controls').classList.contains('is-collapsed');
     toggleControls(open);
   });
-  $('now-btn').addEventListener('click', () => { setTimeLimits(); $('time-msg').textContent = ''; setBaseTime(Date.now()); $('to-map').hidden = false; });
-  $('time-input').addEventListener('change', (e) => { onTimeInput(e.target.value); $('to-map').hidden = false; }); // 日時を変えたあとも地図へ移れるように
+  $('now-btn').addEventListener('click', () => { setTimeLimits(); $('time-msg').textContent = ''; setBaseTime(Date.now()); $('to-list').hidden = false; });
+  $('time-input').addEventListener('change', (e) => { onTimeInput(e.target.value); $('to-list').hidden = false; }); // 日時を変えたあとも一覧へ移れるように
   $('night-tabs').addEventListener('click', (e) => {
     const b = e.target.closest('.night-tab');
     if (!b) return;

@@ -85,7 +85,7 @@ a { color: var(--link); }
 
 .layout {
   display: grid; gap: 32px var(--gap); padding-top: 16px; padding-bottom: 24px;
-  grid-template-areas: "controls" "map" "passes" "sky";
+  grid-template-areas: "controls" "passes" "map" "sky"; /* スマホ・タブレットは「場所と日時→見える時間→地図→空の図」と使う順に並べる（2026-10-06 オーナー判断）。PC は下で地図を上にする */
   grid-template-columns: minmax(0, 1fr);
 }
 .controls { grid-area: controls; }
@@ -103,8 +103,8 @@ a { color: var(--link); }
 .controls:not(.is-collapsed) .controls-summary { margin-bottom: 12px; }
 .controls.is-collapsed .controls-grid { display: none; }
 .controls.is-collapsed #place-notice { display: none; } /* 畳んでいるときは、要約の「仮に…で表示しています」で伝える（宇宙ステーションのページ） */
-.to-map { justify-self: stretch; margin-top: 24px; } /* 場所や日時を変えたあと、欄のいちばん下から地図へひと押しで移る（スマホ・タブレットだけ）。欄と欄の間より広く空けて「締めくくりの操作」と分かるように。横幅いっぱいで、一覧の「地図で通り道を見る」とそろえる */
-.to-map[hidden] { display: none; }
+.to-list { justify-self: stretch; margin-top: 24px; } /* 場所や日時を変えたあと、欄のいちばん下から見える時間（一覧）へひと押しで移る（スマホ・タブレットだけ）。欄と欄の間より広く空けて「締めくくりの操作」と分かるように。横幅いっぱいで、一覧の「地図で通り道を見る」とそろえる */
+.to-list[hidden] { display: none; }
 .controls .current-place { display: none; } /* スマホは要約に場所が出ているので出さない */
 .controls.is-collapsed .card-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .controls-grid .field { margin-bottom: 0; }
@@ -471,7 +471,7 @@ p.legend { display: flex; margin-left: 0; }
 
 @media (min-width: 960px) {
   .night-tabs { grid-template-columns: repeat(auto-fill, minmax(7.5em, 1fr)); } /* 選んだ日付のタブ（太字）も1行に収める */
-  .to-map { display: none; } /* PC は「場所と日時」のすぐ下に地図が見えているので出さない */
+  .to-list { display: none; } /* PC は「場所と日時」の下に地図と一覧が見えているので出さない */
   .jump { display: none; }
   .layout {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

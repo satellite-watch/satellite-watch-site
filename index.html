@@ -40,8 +40,8 @@
 </header>
 
 <nav class="jump" aria-label="ページ内の移動">
-  <a href="#view">地図</a>
   <a href="#passes">見える時間</a>
+  <a href="#view">地図</a>
   <a href="#sky">空の図</a>
 </nav>
 
@@ -76,9 +76,31 @@
         <p id="time-msg" class="msg" role="status"></p>
         <p class="hint">今夜から7夜分（今日から7日先の朝まで）の予報を出します。先の日付を選ぶと、その分短くなります。先の日付ほど、時刻が数分ずれることがあります。</p>
       </div>
-      <!-- 場所や日時を変えたあと、地図へひと押しで移る（スマホだけ）。場所→日時→地図の順に上から下へ進めるよう、欄のいちばん下に置く（2026-10-05 オーナーの提案） -->
-      <button type="button" id="to-map" class="btn btn-ghost to-map" hidden>地図を見る ↓</button>
+      <!-- 場所や日時を変えたあと、見える時間（一覧）へひと押しで移る（スマホだけ）。場所→日時→見える時間の順に上から下へ進めるよう、欄のいちばん下に置く（2026-10-05 オーナーの提案、2026-10-06 一覧を地図より上にしたので行き先を一覧に） -->
+      <button type="button" id="to-list" class="btn btn-ghost to-list" hidden>見える時間を見る ↓</button>
     </div>
+  </section>
+
+  <section id="passes" class="card passes" aria-labelledby="h-passes">
+    <h2 id="h-passes" class="card-title" tabindex="-1">衛星が見える時間</h2>
+    <div id="sat-only" class="sat-only" hidden>
+      <p><b id="sat-only-name"></b>の見える時間だけを表示中<span id="sat-only-low">（低い回も含みます）</span><span id="sat-only-none" class="sat-only-none" hidden></span><span id="sat-only-place" class="sat-only-place" hidden>いまは仮に東京（千代田区）から見た時刻と方角です。<a href="#controls">見る場所を選ぶ</a></span></p>
+      <button type="button" id="sat-only-clear" class="btn btn-ghost">解除</button>
+    </div>
+    <div id="night-tabs" class="night-tabs" role="group" aria-label="日付"></div>
+    <div class="filters" role="group" aria-label="絞り込み">
+      <label class="chip"><input type="checkbox" id="only-big" checked><span><b class="chip-title">明るい衛星だけ</b><small class="chip-sub">街中でも見つけやすい約40機</small></span></label>
+      <label class="chip"><input type="checkbox" id="only-easy" checked><span><b class="chip-title">見やすい回だけ</b><small class="chip-sub">高さ40°以上を通る</small></span></label>
+      <label class="chip"><input type="checkbox" id="only-stations"><span><b class="chip-title">宇宙ステーションだけ</b><small class="chip-sub">ISS・天宮（とても明るい）</small></span></label>
+    </div>
+    <ul class="notice notice-list">
+      <li id="notice-pick">下の一覧から見たい時間を押すと、「地図で通り道を見る」ボタンが出ます。</li>
+      <li id="notice-station">宇宙ステーションはとても明るいので、25°以上の回も出します。</li>
+    </ul>
+    <p id="data-warn" class="warn" hidden></p>
+    <p id="passes-status" class="msg" role="status">軌道データを読み込んでいます…</p>
+    <ol id="pass-list" class="pass-list"></ol>
+    <button type="button" id="to-top" class="btn to-top" hidden>↑ 一覧の先頭へ</button>
   </section>
 
   <section id="view" class="card mapview" aria-labelledby="h-view">
@@ -125,28 +147,6 @@
       <input id="time-slider" type="range" min="-180" max="180" step="1" value="0" aria-label="時刻を前後に動かす">
       <span id="slider-time" class="slider-time"></span>
     </div>
-  </section>
-
-  <section id="passes" class="card passes" aria-labelledby="h-passes">
-    <h2 id="h-passes" class="card-title" tabindex="-1">衛星が見える時間</h2>
-    <div id="sat-only" class="sat-only" hidden>
-      <p><b id="sat-only-name"></b>の見える時間だけを表示中<span id="sat-only-low">（低い回も含みます）</span><span id="sat-only-none" class="sat-only-none" hidden></span><span id="sat-only-place" class="sat-only-place" hidden>いまは仮に東京（千代田区）から見た時刻と方角です。<a href="#controls">見る場所を選ぶ</a></span></p>
-      <button type="button" id="sat-only-clear" class="btn btn-ghost">解除</button>
-    </div>
-    <div id="night-tabs" class="night-tabs" role="group" aria-label="日付"></div>
-    <div class="filters" role="group" aria-label="絞り込み">
-      <label class="chip"><input type="checkbox" id="only-big" checked><span><b class="chip-title">明るい衛星だけ</b><small class="chip-sub">街中でも見つけやすい約40機</small></span></label>
-      <label class="chip"><input type="checkbox" id="only-easy" checked><span><b class="chip-title">見やすい回だけ</b><small class="chip-sub">高さ40°以上を通る</small></span></label>
-      <label class="chip"><input type="checkbox" id="only-stations"><span><b class="chip-title">宇宙ステーションだけ</b><small class="chip-sub">ISS・天宮（とても明るい）</small></span></label>
-    </div>
-    <ul class="notice notice-list">
-      <li id="notice-pick">下の一覧から見たい時間を押すと、「地図で通り道を見る」ボタンが出ます。</li>
-      <li id="notice-station">宇宙ステーションはとても明るいので、25°以上の回も出します。</li>
-    </ul>
-    <p id="data-warn" class="warn" hidden></p>
-    <p id="passes-status" class="msg" role="status">軌道データを読み込んでいます…</p>
-    <ol id="pass-list" class="pass-list"></ol>
-    <button type="button" id="to-top" class="btn to-top" hidden>↑ 一覧の先頭へ</button>
   </section>
 
   <section id="sky" class="card skyview" aria-labelledby="h-sky">
