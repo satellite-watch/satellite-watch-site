@@ -401,15 +401,18 @@ function renderPasses() {
 const BAR_H = 64; // スマホの上部の移動バーの高さ
 const TO_TOP = [
   { box: 'passes', btn: 'to-top', heading: 'h-passes', mark: 'night-tabs', part: 1 },   // 日付タブの下端が隠れたら
-  { box: 'sky', btn: 'sky-top', heading: 'h-sky', mark: 'sky-svg', part: 0.5 },          // 空の図が半分隠れたら
+  // 空の図：スマホは図が半分隠れたら。PC（箱の中だけ動く）は図の上端が隠れたら。
+  // PC は箱の中が少ししか動かないことが多く、「半分」だと下まで送っても出ないため（2026-10-05 オーナーの指摘）
+  { box: 'sky', btn: 'sky-top', heading: 'h-sky', mark: 'sky-svg', part: 0.5, pcPart: 0 },
 ];
 const boxScrolls = (el) => getComputedStyle(el).overflowY === 'auto';
 function updateToTop() {
   for (const t of TO_TOP) {
     const box = $(t.box), mark = $(t.mark);
     const m = mark.getBoundingClientRect();
-    const edge = m.top + m.height * t.part; // この線が見えなくなったら出す
-    const top = boxScrolls(box) ? box.getBoundingClientRect().top : BAR_H;
+    const pc = boxScrolls(box);
+    const edge = m.top + m.height * (pc && t.pcPart != null ? t.pcPart : t.part); // この線が見えなくなったら出す
+    const top = pc ? box.getBoundingClientRect().top : BAR_H;
     $(t.btn).hidden = edge > top;
   }
   // 「地図で通り道を見る」が右下の「先頭へ」の場所に来ているあいだは、「先頭へ」を隠す（重なって押し間違えないように）
