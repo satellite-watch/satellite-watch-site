@@ -378,6 +378,16 @@ p.legend { display: flex; margin-left: 0; }
 .faq-list p, .faq-list ul { margin: 8px 0 0; font-size: 16px; line-height: 1.8; } /* 長い文章なので本文と同じ16px */
 .faq-list p + p, .faq-list p + ul { margin-top: 12px; }
 .faq-list ul { padding-left: 1.5em; }
+/* 予報のページのよくある質問だけ、質問を押すと答えが開く形（2026-10-05 オーナー判断）。宇宙ステーションのページの「〜について」は開いたままの説明文なので #faq の中だけに効かせる */
+#faq .faq-list { border-bottom: 1px solid var(--line); }
+#faq details { border-top: 1px solid var(--line); }
+#faq details[open] { padding-bottom: 16px; }
+#faq summary { display: flex; align-items: baseline; gap: 8px; min-height: 44px; padding: 10px 0; cursor: pointer; list-style: none; } /* 行全体が押せる。高さ44px以上。▸ は2行になる質問でも1行目にそろえる（baseline） */
+#faq summary::-webkit-details-marker { display: none; } /* ブラウザ標準の三角は消す（Safari） */
+#faq summary::before { content: "\25B8"; content: "\25B8" / ""; flex: none; width: 1em; text-align: center; font-size: 20px; color: var(--text-dim); } /* ▸。読み上げでは読まない。▸ と ▾ を同じ幅にして、開いたときに質問の文字が動かないように。小さすぎて押せると気づかれないことがないよう20px */
+#faq details[open] > summary::before { content: "\25BE"; content: "\25BE" / ""; } /* ▾ */
+#faq summary h3 { margin: 0; padding: 0; border: 0; }
+#faq summary:hover h3 { text-decoration: underline; text-underline-offset: 4px; } /* PC：押せる行だと分かるように（上のタブと同じく下線で示す） */ /* 区切り線は details に付けるので、見出しの線と余白は外す */
 
 /* ---------- 宇宙ステーションのページ（iss.html・tiangong.html） ---------- */
 /* 本文の先頭の大見出しと説明。地図を早く見せるため短くする */
