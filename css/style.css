@@ -180,9 +180,10 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .sat-only[hidden] { display: none; }
 .sat-only p { flex: 1; min-width: 0; margin: 0; font-size: 15px; line-height: 1.6; }
 .sat-only p b { font-size: 16px; }
-.sat-only-none { display: block; margin-top: 2px; font-weight: 700; }
+.sat-only-none { display: block; margin-top: 6px; } /* 太字は日付だけ（文全体を太くすると日付が埋もれる） */
 .sat-only-none[hidden] { display: none; }
-.sat-only-place { display: block; margin-top: 2px; } /* 図鑑や検索から初めて来た人に、仮の場所（東京）の予報だと伝える */
+.sat-only-place { display: block; margin-top: 6px; }
+.sat-only-place a { display: inline-block; padding: 12px 4px; margin: -12px -4px; } /* 押せる範囲を44px以上に（見た目の位置は変えない） */ /* 図鑑や検索から初めて来た人に、仮の場所（東京）の予報だと伝える */
 .sat-only-place[hidden] { display: none; }
 .msg.is-notice { color: var(--text); }
 @media (max-width: 359px) { .sat-only { flex-wrap: wrap; } .sat-only .btn { width: 100%; } }
@@ -298,7 +299,7 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .legend { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; margin-left: 4px; }
 p.legend { display: flex; margin-left: 0; }
 .dot-observer { background: var(--observer); box-shadow: 0 0 0 2px var(--white); }
-.ring-start { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--accent); margin-right: 4px; vertical-align: -1px; } /* 空の図の「現れる位置」 */
+.ring-start { display: inline-block; width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid var(--accent); margin-right: 4px; vertical-align: -1px; } /* 空の図の「現れる位置」 */
 .ring-observer { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 2px dashed var(--observer); margin-right: 4px; vertical-align: -2px; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
 .dot-vis { background: var(--accent); }
@@ -404,6 +405,7 @@ p.legend { display: flex; margin-left: 0; }
 .station-intro { padding-top: 16px; }
 .station-title { margin: 0; font-size: 24px; line-height: 1.4; }
 .nowrap { display: inline-block; } /* 「（中国の宇宙ステーション）」などを途中で改行しない */
+@media (max-width: 359px) { .station-title { font-size: 22px; } .station-title .nowrap { font-feature-settings: "palt"; } } /* 320px でも1行に収める（かっこを半分の幅に詰める） */
 .station-lead { margin: 6px 0 0; max-width: 40em; font-size: 16px; line-height: 1.7; color: var(--text-dim); }
 .faq-list .about-src { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.7; color: var(--text-dim); }
 @media (min-width: 600px) { .station-title { font-size: 28px; } } /* PC はサイト名（26px）より大きくし、このページの題名だと分かるように */
@@ -468,6 +470,7 @@ p.legend { display: flex; margin-left: 0; }
 .site-footer .is-old { color: var(--station); font-weight: 700; }
 
 @media (min-width: 960px) {
+  .night-tabs { grid-template-columns: repeat(auto-fill, minmax(7.5em, 1fr)); } /* 選んだ日付のタブ（太字）も1行に収める */
   .to-map { display: none; } /* PC は「場所と日時」のすぐ下に地図が見えているので出さない */
   .jump { display: none; }
   .layout {

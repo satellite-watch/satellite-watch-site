@@ -97,7 +97,8 @@ function setPlace(p) {
 
 // スマホで畳んでいる「場所と日時」の要約と開け閉め
 function updateSummary() {
-  $('sum-place').textContent = state.firstVisit ? `仮に${state.place.name}で表示しています` : state.place.name;
+  // 仮の場所（東京）のときは、畳んでいるあいだだけ要約で伝える（開いているときは上の案内の枠で伝えている）
+  $('sum-place').textContent = state.firstVisit && $('controls').classList.contains('is-collapsed') ? '仮に東京（千代田区）で表示しています' : state.place.name;
   $('sum-time').textContent = state.data === 'error' ? '' : `${mdShort(state.baseTime)} ${hm(state.baseTime)}から${nightKeys().length}夜分`;
   $('sum-msg').textContent = state.data === 'error' ? '軌道データを読み込めませんでした' : '';
 }
@@ -105,6 +106,7 @@ function toggleControls(open) {
   $('controls').classList.toggle('is-collapsed', !open);
   $('controls-toggle').setAttribute('aria-expanded', String(open));
   $('controls-toggle').textContent = open ? '閉じる' : '変える';
+  updateSummary();
 }
 
 // ---------- 見える回の計算（裏で行う） ----------
@@ -178,12 +180,12 @@ function aheadText() {
   if (state.aheadEasyOnly) { // 7夜のうちに低い回しかないときは、「見やすい回」がいつからかだけを言う
     const easy = state.ahead.find((p) => Math.round(p.max.el) >= STATION_MIN_EL);
     return easy
-      ? `見やすい回（高さ${STATION_MIN_EL}°以上）は、${md(easy.start.t)}ごろの${whenWord(easy.start.t).split(' ')[1]}から見える見込みです。日が近づいたら、もう一度確かめてください。`
+      ? `見やすい回（高さ${STATION_MIN_EL}°以上）は、<b>${md(easy.start.t)}ごろの${whenWord(easy.start.t).split(' ')[1]}</b>から見える見込みです。日が近づいたら、もう一度確かめてください。`
       : `見やすい回（高さ${STATION_MIN_EL}°以上）は、その先${AHEAD_DAYS}日ほども無い見込みです。`;
   }
   const first = state.ahead[0];
   if (!first) return `その先${AHEAD_DAYS}日ほども見える回はない見込みです。`;
-  const when = (p) => `${md(p.start.t)}ごろの${whenWord(p.start.t).split(' ')[1]}`;
+  const when = (p) => `<b>${md(p.start.t)}ごろの${whenWord(p.start.t).split(' ')[1]}</b>`; // 日付だけ太く（文の中で目で拾いやすく）
   const easy = state.ahead.find((p) => Math.round(p.max.el) >= STATION_MIN_EL);
   const high = easy && easy !== first ? `（見やすい回（高さ${STATION_MIN_EL}°以上）は${when(easy)}から）` : '';
   return `次は${when(first)}から見え始める見込みです${high}。日が近づいたら、もう一度確かめてください。`;
@@ -344,13 +346,13 @@ function onFilterChange() {
 
 // 1機に絞っているときの帯：低い回まで出しているか、7夜とも見えないかを、いまの計算と絞り込みに合わせて出し直す
 function updateSatOnlyBar() {
-  $('sat-only-low').hidden = state.minEl > 10;
   const keys = nightKeys();
   const none = !state.computing && !keys.some((k) => filteredPasses(k).length > 0);
   // 7夜とも見えないときは、帯の中で知らせる（一覧の上の案内文は、スマホでは画面の外になりやすいため）。
   // 低い回しかないときも、見やすい回がいつからかを帯で知らせる
   const lowOnly = !none && state.aheadEasyOnly && Array.isArray(state.ahead);
-  $('sat-only-none').textContent = none ? `${satNoneText()}${aheadText()}`
+  $('sat-only-low').hidden = state.minEl > 10 || lowOnly; // 低い回しかないときは、すぐ下の文と重なるので出さない
+  $('sat-only-none').innerHTML = none ? `${satNoneText()}${aheadText()}`
     : lowOnly ? `この先${keys.length}夜は、低い空を通る回だけです。${aheadText()}` : '';
   $('sat-only-none').hidden = !(none || lowOnly);
   // 場所をまだ選んでいない人（図鑑や検索から初めて来た人）には、仮に東京の予報だと帯でも伝える（一覧へ移ると上の案内が見えなくなるため）
@@ -544,25 +546,34 @@ function renderSky(snap, viewTime) {
   const parts = [`<title id="sky-title">空の図</title>`];
   parts.push(`<circle class="sky-bg" r="${R}"/>`);
   for (const el of [30, 60]) parts.push(`<circle class="sky-ring" r="${(R * (90 - el)) / 90}"/>`);
-  parts.push(`<text class="sky-deg" x="3" y="${-(R * 60) / 90 + 14}">30°</text><text class="sky-deg" x="3" y="${-(R * 30) / 90 + 14}">60°</text>`);
   for (const [t, az] of [['北', 0], ['東', 90], ['南', 180], ['西', 270]]) {
     const a = (az * Math.PI) / 180;
     parts.push(`<text class="sky-dir" x="${(R + 12) * Math.sin(a)}" y="${-(R + 12) * Math.cos(a)}">${t}</text>`);
   }
 
   const sel = state.selected;
-  let selEnds = []; // 選んだ回の「現れる」「消える」の位置（衛星名の文字と重ならないようにするため）
+  let selEnds = []; // 選んだ回の「現れる」「消える」の位置（ほかの文字と重ならないようにするため）
+  const selLabels = []; // 選んだ回の時刻の文字。点をすべて描いたあとに足す（いまの衛星の点に隠れないように）
   if (sel) {
     const pts = sel.track.map((q) => skyXY(q.az, q.el).map((v) => v.toFixed(1)).join(',')).join(' ');
     parts.push(`<polyline class="sky-track" points="${pts}"/>`);
     const [sx, sy] = skyXY(sel.start.az, sel.start.el);
     const [ex, ey] = skyXY(sel.end.az, sel.end.el);
     // 現れる位置は中を塗らない輪にする（黄色の丸だと「見える衛星がもう1機ある」と見誤るため）。
-    // とても短い回で「現れる」「消える」が近いときは、文字を上下に分けて重ならないようにする
+    // 選んだ直後は、いまの衛星の点（半径7）が同じ場所に来るので、その外にのぞく大きさにする
+    parts.push(`<circle class="sky-start" cx="${sx}" cy="${sy}" r="9"/>`);
+    parts.push(`<path class="sky-dot-vis" d="${arrowHead(sel)}"/>`);
+    // とても短い回で「現れる」「消える」が近いときは、文字を左右に振り分ける（「現れる」は来た側、「消える」は進む側）
     const close = Math.hypot(sx - ex, sy - ey) < 30;
-    parts.push(`<circle class="sky-start" cx="${sx}" cy="${sy}" r="5"/>${skyLabel(sx, sy, `${hm(sel.start.t)} 現れる`, 8, close ? 18 : 4)}`);
-    parts.push(`<path class="sky-dot-vis" d="${arrowHead(sel)}"/>${skyLabel(ex, ey, `${hm(sel.end.t)} 消える`, 8, close ? -12 : 4)}`);
+    const goRight = ex >= sx;
+    selLabels.push(skyLabel(sx, sy, `${hm(sel.start.t)} 現れる`, 12, 4, close ? (goRight ? 'left' : 'right') : null));
+    selLabels.push(skyLabel(ex, ey, `${hm(sel.end.t)} 消える`, 10, 4, close ? (goRight ? 'right' : 'left') : null));
     selEnds = [[sx, sy], [ex, ey]];
+  }
+  const nearSelEnd = (x, y, d) => selEnds.some(([qx, qy]) => Math.hypot(qx - x, qy - y) < d);
+  // 高さの目盛り（30°・60°）。通り道の線より上に描く。選んだ回の時刻の文字と重なるところでは出さない
+  for (const [deg, r] of [['30°', (R * 60) / 90], ['60°', (R * 30) / 90]]) {
+    if (!nearSelEnd(17, -r + 9, 40)) parts.push(`<text class="sky-deg" x="3" y="${-r + 14}">${deg}</text>`);
   }
 
   // 空に出ている衛星（見えないものを先に描き、見えるものを上に重ねる）
@@ -579,24 +590,36 @@ function renderSky(snap, viewTime) {
     } else {
       parts.push(`<circle class="sky-dot-shadow" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${x.sat.bright ? 5 : 3}"/>`);
     }
-    // 選んだ衛星が「現れる」「消える」の位置の近くにいるときは、名前を出さない（時刻の文字と重なるため。名前は地図の説明に出ている）
-    const nearEnd = isSel && selEnds.some(([qx, qy]) => Math.hypot(qx - cx, qy - cy) < 30);
-    if ((x.sat.bright || isSel) && !nearEnd) parts.push(skyLabel(cx, cy, esc(shortName(x.sat)), 9, -8));
+    // 名前は、選んだ回の「現れる」「消える」の近くでは出さない（時刻の文字と重なるため。選んだ衛星の名前は地図の説明に出ている）
+    if ((x.sat.bright || isSel) && !nearSelEnd(cx, cy, isSel ? 30 : 40)) parts.push(skyLabel(cx, cy, esc(shortName(x.sat)), 9, -8));
     if (x.sat.id === skyTip.id) {
       parts.push(`<circle class="sky-hover" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="10"/>`);
     }
   }
+  parts.push(...selLabels);
   $('sky-svg').innerHTML = parts.join('');
   skyTip.dots = up.map((x) => ({ x, xy: skyXY(x.st.az, x.st.el) }));
   placeSkyTip();
 }
 
-// 空の図の文字。図の右寄りでは点の左に、下の端では点の上に置いて、図の外に切れないようにする
-function skyLabel(x, y, text, dx, dy) {
-  const right = x > 40;
+// 空の図の文字。図の右寄りでは点の左に、下の端では点の上に置いて、図の外に切れないようにする。
+// side（'left'／'right'）を渡すと、その側に置く。文字の幅をおおまかに見積もり、図の外にはみ出すなら反対側に置く
+const SKY_EDGE = 168;
+function skyLabel(x, y, text, dx, dy, side = null) {
+  const w = [...text.replace(/&[a-z]+;/g, '&')].reduce((n, c) => n + (/[A-Z0-9]/.test(c) ? 11 : c.charCodeAt(0) < 0x80 ? 9 : 16), 0); // 文字の大きさ16の目安（英大文字・数字は広め）
+  const fitsStart = x + dx + w <= SKY_EDGE; // 点の右に置いて収まるか
+  const fitsEnd = x - dx - w >= -SKY_EDGE; // 点の左に置いて収まるか
   let ty = y + dy;
   if (y > 140) ty = y - 10;
   else if (y < -140) ty = y + 18;
+  if (!fitsStart && !fitsEnd) {
+    // どちらに置いてもはみ出す長い名前は、点の上（上の端では下）に、図の中に収まるよう中央寄せで置く
+    const mx = Math.max(-SKY_EDGE + w / 2, Math.min(SKY_EDGE - w / 2, x));
+    return `<text class="sky-label" text-anchor="middle" x="${mx.toFixed(1)}" y="${(y < -130 ? y + 22 : y - 12).toFixed(1)}">${text}</text>`;
+  }
+  let right = side ? side === 'left' : x > 40; // right＝点の左に置く（右寄せ）
+  if (!right && !fitsStart) right = true;
+  else if (right && !fitsEnd) right = false;
   return `<text class="sky-label" text-anchor="${right ? 'end' : 'start'}" x="${(right ? x - dx : x + dx).toFixed(1)}" y="${ty.toFixed(1)}">${text}</text>`;
 }
 
@@ -1024,11 +1047,18 @@ async function start() {
   $('place-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const q = $('place-input').value.trim();
+    $('to-map').hidden = true; // 探し直すあいだは出さない（失敗の知らせの下に残ると、場所が変わったように見えるため）
     if (q) searchPlace(q, setPlace);
   });
   $('geo-btn').addEventListener('click', () => useGeolocation(setPlace));
   // 帯の「見る場所を選ぶ」：「場所と日時」を開いてから、そこへ移る（移るのはリンクのふつうの動き）
-  $('sat-only-place').addEventListener('click', (e) => { if (e.target.closest('a')) toggleControls(true); });
+  $('sat-only-place').addEventListener('click', (e) => {
+    if (!e.target.closest('a')) return;
+    e.preventDefault();
+    toggleControls(true);
+    $('controls').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+    $('place-input').focus({ preventScroll: true }); // すぐ打ち込めるように
+  });
   $('to-map').addEventListener('click', () => {
     $('view').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     $('h-view').focus({ preventScroll: true });
