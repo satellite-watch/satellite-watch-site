@@ -102,6 +102,9 @@ a { color: var(--link); }
 .controls-summary strong { color: var(--text); font-size: 16px; }
 .controls:not(.is-collapsed) .controls-summary { margin-bottom: 12px; }
 .controls.is-collapsed .controls-grid { display: none; }
+.controls.is-collapsed #place-notice { display: none; } /* 畳んでいるときは、要約の「仮に…で表示しています」で伝える（宇宙ステーションのページ） */
+.to-map { margin-top: 8px; } /* 場所を選んだあと、地図へひと押しで移る（スマホだけ。PC は地図がすぐ下に見えている） */
+.to-map[hidden] { display: none; }
 .controls .current-place { display: none; } /* スマホは要約に場所が出ているので出さない */
 .controls.is-collapsed .card-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .controls-grid .field { margin-bottom: 0; }
@@ -221,8 +224,8 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
   box-shadow: 0 0 0 4px var(--bg), 0 4px 12px color-mix(in srgb, var(--bg) 80%, transparent);
 }
 .to-top[hidden] { display: none; }
-#h-passes:focus, #h-sky:focus { outline: none; } /* 戻ったときに見出しへ操作位置を移すだけなので、枠は出さない */
-#h-passes:focus-visible, #h-sky:focus-visible { outline: 3px solid var(--focus); }
+#h-passes:focus, #h-sky:focus, #h-view:focus { outline: none; } /* 戻ったときに見出しへ操作位置を移すだけなので、枠は出さない */
+#h-passes:focus-visible, #h-sky:focus-visible, #h-view:focus-visible { outline: 3px solid var(--focus); }
 /* 回と回の間を広めに取り、1件ずつ区切って読みやすくする */
 .pass-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 16px; }
 .pass {
@@ -465,6 +468,7 @@ p.legend { display: flex; margin-left: 0; }
 .site-footer .is-old { color: var(--station); font-weight: 700; }
 
 @media (min-width: 960px) {
+  .to-map { display: none; } /* PC は「場所と日時」のすぐ下に地図が見えているので出さない */
   .jump { display: none; }
   .layout {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -476,6 +480,7 @@ p.legend { display: flex; margin-left: 0; }
   .controls-summary { display: none; }
   .controls .current-place { display: block; }
   .controls.is-collapsed .controls-grid { display: grid; }
+  .controls.is-collapsed #place-notice:not([hidden]) { display: block; } /* PC は畳まないので、案内も出す */
   .controls.is-collapsed .card-title { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
   .controls-grid .field + .field { margin-top: 0; }
   #map { height: 560px; }

@@ -87,6 +87,7 @@ function setPlace(p) {
   // 欄が開いたままなので、切り替わったことを一言で知らせる（#place-msg は読み上げにも伝わる）
   $('place-msg').classList.remove('is-error');
   $('place-msg').textContent = `${p.name}の予報に切り替えました。続けて日時も変えられます。`;
+  $('to-map').hidden = false; // スマホだけに出る（CSS）。地図へひと押しで移れるように
   state.selected = null;
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、新しい場所でその衛星が見える最初の夜を選び直す
   updateObserverOnMap(true);
@@ -96,7 +97,7 @@ function setPlace(p) {
 
 // スマホで畳んでいる「場所と日時」の要約と開け閉め
 function updateSummary() {
-  $('sum-place').textContent = state.place.name;
+  $('sum-place').textContent = state.firstVisit ? `仮に${state.place.name}で表示しています` : state.place.name;
   $('sum-time').textContent = state.data === 'error' ? '' : `${mdShort(state.baseTime)} ${hm(state.baseTime)}から${nightKeys().length}夜分`;
   $('sum-msg').textContent = state.data === 'error' ? '軌道データを読み込めませんでした' : '';
 }
@@ -156,11 +157,16 @@ function requestPasses() {
   worker.postMessage({ type: 'passes', id: state.reqId, lat: state.place.lat, lon: state.place.lon, start: state.baseTime, days });
 }
 
-// 宇宙ステーションのページで、7夜のうちに一度も見えない（低い回も含めて）ときだけ、その先を探す。
+// 宇宙ステーションのページで、7夜のうちに一度も見えない（低い回も含めて）とき、
+// または低い回しかないとき（2026-10-05 オーナー判断）に、その先を探す。
 // 7夜より先は軌道の変化で時刻がずれやすいので、画面には日付だけを出す
 function requestAhead() {
   state.ahead = null;
-  if (!FIXED_SAT || !state.satById.get(FIXED_SAT) || state.passes.some((p) => p.satId === FIXED_SAT)) return;
+  state.aheadEasyOnly = false;
+  const sat = state.satById.get(FIXED_SAT);
+  const mine = state.passes.filter((p) => p.satId === FIXED_SAT);
+  if (!FIXED_SAT || !sat || mine.some((p) => isEasy(p, sat))) return;
+  state.aheadEasyOnly = mine.length > 0; // 低い回はあるが、見やすい回（25°以上）がない
   state.ahead = 'loading';
   const keys = nightKeys();
   const start = nightNoon(keys[keys.length - 1]) + 86400000;
@@ -169,6 +175,12 @@ function requestAhead() {
 // 「次は○月○日ごろの明け方から見え始める見込み」の文（日付だけ。時刻は出さない）
 function aheadText() {
   if (!Array.isArray(state.ahead)) return '';
+  if (state.aheadEasyOnly) { // 7夜のうちに低い回しかないときは、「見やすい回」がいつからかだけを言う
+    const easy = state.ahead.find((p) => Math.round(p.max.el) >= STATION_MIN_EL);
+    return easy
+      ? `見やすい回（高さ${STATION_MIN_EL}°以上）は、${md(easy.start.t)}ごろの${whenWord(easy.start.t).split(' ')[1]}から見える見込みです。日が近づいたら、もう一度確かめてください。`
+      : `見やすい回（高さ${STATION_MIN_EL}°以上）は、その先${AHEAD_DAYS}日ほども無い見込みです。`;
+  }
   const first = state.ahead[0];
   if (!first) return `その先${AHEAD_DAYS}日ほども見える回はない見込みです。`;
   const when = (p) => `${md(p.start.t)}ごろの${whenWord(p.start.t).split(' ')[1]}`;
@@ -335,9 +347,12 @@ function updateSatOnlyBar() {
   $('sat-only-low').hidden = state.minEl > 10;
   const keys = nightKeys();
   const none = !state.computing && !keys.some((k) => filteredPasses(k).length > 0);
-  // 7夜とも見えないときは、帯の中で知らせる（一覧の上の案内文は、スマホでは画面の外になりやすいため）
-  $('sat-only-none').textContent = none ? `${satNoneText()}${aheadText()}` : '';
-  $('sat-only-none').hidden = !none;
+  // 7夜とも見えないときは、帯の中で知らせる（一覧の上の案内文は、スマホでは画面の外になりやすいため）。
+  // 低い回しかないときも、見やすい回がいつからかを帯で知らせる
+  const lowOnly = !none && state.aheadEasyOnly && Array.isArray(state.ahead);
+  $('sat-only-none').textContent = none ? `${satNoneText()}${aheadText()}`
+    : lowOnly ? `この先${keys.length}夜は、低い空を通る回だけです。${aheadText()}` : '';
+  $('sat-only-none').hidden = !(none || lowOnly);
   // 場所をまだ選んでいない人（図鑑や検索から初めて来た人）には、仮に東京の予報だと帯でも伝える（一覧へ移ると上の案内が見えなくなるため）
   $('sat-only-place').hidden = !state.firstVisit;
 }
@@ -472,7 +487,8 @@ function zukanLink(sat) {
 // 夕方〜夜の回か、明け方の回か（同じ「夜」のタブに両方が入るため）
 function whenWord(ms) {
   const h = jstParts(ms).h;
-  return `${mdShort(ms)} ${h < 4 ? '深夜' : h < 12 ? '明け方' : h < 19 ? '夕方' : '夜'}`;
+  // 0〜4時は「未明」（「深夜」だと前の日の夜の続きと読まれ、1日遅れて外に出る人が出るため。2026-10-05 オーナー判断）
+  return `${mdShort(ms)} ${h < 4 ? '未明' : h < 12 ? '明け方' : h < 19 ? '夕方' : '夜'}`;
 }
 
 function selectPass(p) {
@@ -996,10 +1012,11 @@ async function start() {
   $('passes-status').textContent = '軌道データを読み込んでいます…';
   $('place-name').textContent = state.place.name;
   updateSummary();
-  // 初めて来た人には、仮の場所だと伝えて「場所と日時」を開いておく
+  // 初めて来た人には、仮の場所だと伝えて「場所と日時」を開いておく。
+  // ただし宇宙ステーションのページは閉じたままにし、要約で仮の場所だと伝える（検索で来た人に、まず地図と「いつ見えるか」を見せるため。2026-10-05 オーナー判断）
   if (state.firstVisit) {
     $('place-notice').hidden = false;
-    toggleControls(true);
+    if (!FIXED_SAT) toggleControls(true);
   }
   setTimeLimits();
   $('time-input').value = toInputValue(state.baseTime);
@@ -1012,6 +1029,10 @@ async function start() {
   $('geo-btn').addEventListener('click', () => useGeolocation(setPlace));
   // 帯の「見る場所を選ぶ」：「場所と日時」を開いてから、そこへ移る（移るのはリンクのふつうの動き）
   $('sat-only-place').addEventListener('click', (e) => { if (e.target.closest('a')) toggleControls(true); });
+  $('to-map').addEventListener('click', () => {
+    $('view').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+    $('h-view').focus({ preventScroll: true });
+  });
   $('controls-toggle').addEventListener('click', () => {
     const open = $('controls').classList.contains('is-collapsed');
     toggleControls(open);
