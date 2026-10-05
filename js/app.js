@@ -1047,7 +1047,6 @@ async function start() {
   $('place-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const q = $('place-input').value.trim();
-    $('to-map').hidden = true; // 探し直すあいだは出さない（失敗の知らせの下に残ると、場所が変わったように見えるため）
     if (q) searchPlace(q, setPlace);
   });
   $('geo-btn').addEventListener('click', () => useGeolocation(setPlace));
@@ -1067,8 +1066,8 @@ async function start() {
     const open = $('controls').classList.contains('is-collapsed');
     toggleControls(open);
   });
-  $('now-btn').addEventListener('click', () => { setTimeLimits(); $('time-msg').textContent = ''; setBaseTime(Date.now()); });
-  $('time-input').addEventListener('change', (e) => onTimeInput(e.target.value));
+  $('now-btn').addEventListener('click', () => { setTimeLimits(); $('time-msg').textContent = ''; setBaseTime(Date.now()); $('to-map').hidden = false; });
+  $('time-input').addEventListener('change', (e) => { onTimeInput(e.target.value); $('to-map').hidden = false; }); // 日時を変えたあとも地図へ移れるように
   $('night-tabs').addEventListener('click', (e) => {
     const b = e.target.closest('.night-tab');
     if (!b) return;

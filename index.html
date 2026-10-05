@@ -64,7 +64,6 @@
         </div>
         <ul id="place-results" class="place-results" hidden></ul>
         <p id="place-msg" class="msg" role="status"></p>
-        <button type="button" id="to-map" class="btn btn-ghost to-map" hidden>地図を見る ↓</button>
         <p class="current-place">選んでいる場所：<strong id="place-name">—</strong></p>
       </form>
 
@@ -77,6 +76,8 @@
         <p id="time-msg" class="msg" role="status"></p>
         <p class="hint">今夜から7夜分（今日から7日先の朝まで）の予報を出します。先の日付を選ぶと、その分短くなります。先の日付ほど、時刻が数分ずれることがあります。</p>
       </div>
+      <!-- 場所や日時を変えたあと、地図へひと押しで移る（スマホだけ）。場所→日時→地図の順に上から下へ進めるよう、欄のいちばん下に置く（2026-10-05 オーナーの提案） -->
+      <button type="button" id="to-map" class="btn btn-ghost to-map" hidden>地図を見る ↓</button>
     </div>
   </section>
 
