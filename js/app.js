@@ -859,7 +859,7 @@ function renderView() {
     }
     nextIdx = next ? state.passes.indexOf(next) : -1;
   }
-  // 「その時刻を見る」ボタンは作り直さず、出し入れだけする（再生中も押せるように）。
+  // 「次の通り道を見る」ボタン（2026-10-05 オーナー判断で「その時刻を見る」から変更。押すと説明文の次の回を選んで通り道を出す）は作り直さず、出し入れだけする（再生中も押せるように）。
   // 回を選んでいないあいだはボタンの場所を常に取っておき、出たり消えたりしても地図が上下に動かないようにする
   $('view-next').hidden = !(state.data === 'ok' && !state.selected);
   $('next-btn').classList.toggle('is-off', nextIdx < 0);
