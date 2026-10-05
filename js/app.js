@@ -1051,7 +1051,8 @@ async function start() {
     const q = $('place-input').value.trim();
     if (q) searchPlace(q, setPlace);
   });
-  $('geo-btn').addEventListener('click', () => useGeolocation(setPlace));
+  // 現在地を選んだら、前に探した地名を入力欄から消す（残っていると、その地名の予報だと見誤るため）
+  $('geo-btn').addEventListener('click', () => useGeolocation((p) => { $('place-input').value = ''; setPlace(p); }));
   // 帯の「見る場所を選ぶ」：「場所と日時」を開いてから、そこへ移る（移るのはリンクのふつうの動き）
   $('sat-only-place').addEventListener('click', (e) => {
     if (!e.target.closest('a')) return;
