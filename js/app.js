@@ -338,6 +338,8 @@ function updateSatOnlyBar() {
   // 7夜とも見えないときは、帯の中で知らせる（一覧の上の案内文は、スマホでは画面の外になりやすいため）
   $('sat-only-none').textContent = none ? `${satNoneText()}${aheadText()}` : '';
   $('sat-only-none').hidden = !none;
+  // 場所をまだ選んでいない人（図鑑や検索から初めて来た人）には、仮に東京の予報だと帯でも伝える（一覧へ移ると上の案内が見えなくなるため）
+  $('sat-only-place').hidden = !state.firstVisit;
 }
 
 function renderPasses() {
@@ -356,6 +358,8 @@ function renderPasses() {
     return;
   }
   if (state.onlySat) updateSatOnlyBar();
+  // この先の夜に押せる回が1つもないときは、「下の一覧から見たい時間を押すと…」の案内を出さない
+  $('notice-pick').hidden = !nightKeys().some((k) => filteredPasses(k).length > 0);
   const label = nightLabel(state.night);
   if (list.length === 0) {
     // どの絞り込みを外せば回が出るかを、1つずつ試して案内する
@@ -371,7 +375,7 @@ function renderPasses() {
       const any = nightKeys().some((k) => filteredPasses(k).length > 0);
       status.textContent = any
         ? `${label}は、${displayName(only)}の${state.minEl > 10 ? '見やすい回' : '見える回'}がありません。ほかの日を選んでください。`
-        : `${satNoneText(displayName(only))}${FIXED_SAT ? '' : 'ほかの衛星は「解除」で見られます。'}`;
+        : ''; // 7夜とも無いことは、上の帯（#sat-only-none）で知らせている。同じ知らせを重ねると「次は○日ごろから」が埋もれるため
       status.classList.add('is-notice'); // 残念な知らせなので、件数の表示より目立たせる
     } else {
       status.textContent = hit
@@ -531,13 +535,18 @@ function renderSky(snap, viewTime) {
   }
 
   const sel = state.selected;
+  let selEnds = []; // 選んだ回の「現れる」「消える」の位置（衛星名の文字と重ならないようにするため）
   if (sel) {
     const pts = sel.track.map((q) => skyXY(q.az, q.el).map((v) => v.toFixed(1)).join(',')).join(' ');
     parts.push(`<polyline class="sky-track" points="${pts}"/>`);
     const [sx, sy] = skyXY(sel.start.az, sel.start.el);
     const [ex, ey] = skyXY(sel.end.az, sel.end.el);
-    parts.push(`<circle class="sky-dot-vis" cx="${sx}" cy="${sy}" r="5"/>${skyLabel(sx, sy, `${hm(sel.start.t)} 現れる`, 8, 4)}`);
-    parts.push(`<path class="sky-dot-vis" d="${arrowHead(sel)}"/>${skyLabel(ex, ey, `${hm(sel.end.t)} 消える`, 8, 4)}`);
+    // 現れる位置は中を塗らない輪にする（黄色の丸だと「見える衛星がもう1機ある」と見誤るため）。
+    // とても短い回で「現れる」「消える」が近いときは、文字を上下に分けて重ならないようにする
+    const close = Math.hypot(sx - ex, sy - ey) < 30;
+    parts.push(`<circle class="sky-start" cx="${sx}" cy="${sy}" r="5"/>${skyLabel(sx, sy, `${hm(sel.start.t)} 現れる`, 8, close ? 18 : 4)}`);
+    parts.push(`<path class="sky-dot-vis" d="${arrowHead(sel)}"/>${skyLabel(ex, ey, `${hm(sel.end.t)} 消える`, 8, close ? -12 : 4)}`);
+    selEnds = [[sx, sy], [ex, ey]];
   }
 
   // 空に出ている衛星（見えないものを先に描き、見えるものを上に重ねる）
@@ -554,7 +563,9 @@ function renderSky(snap, viewTime) {
     } else {
       parts.push(`<circle class="sky-dot-shadow" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${x.sat.bright ? 5 : 3}"/>`);
     }
-    if (x.sat.bright || isSel) parts.push(skyLabel(cx, cy, esc(shortName(x.sat)), 9, -8));
+    // 選んだ衛星が「現れる」「消える」の位置の近くにいるときは、名前を出さない（時刻の文字と重なるため。名前は地図の説明に出ている）
+    const nearEnd = isSel && selEnds.some(([qx, qy]) => Math.hypot(qx - cx, qy - cy) < 30);
+    if ((x.sat.bright || isSel) && !nearEnd) parts.push(skyLabel(cx, cy, esc(shortName(x.sat)), 9, -8));
     if (x.sat.id === skyTip.id) {
       parts.push(`<circle class="sky-hover" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="10"/>`);
     }
@@ -880,7 +891,9 @@ function renderView() {
   }
   // 「次の回の通り道を見る」ボタン（2026-10-05 オーナー判断で「その時刻を見る」から変更。押すと説明文の次の回を選んで通り道を出す）は作り直さず、出し入れだけする（再生中も押せるように）。
   // 回を選んでいないあいだはボタンの場所を常に取っておき、出たり消えたりしても地図が上下に動かないようにする
-  $('view-next').hidden = !(state.data === 'ok' && !state.selected);
+  // ただし、この先の夜に条件に合う回が1つもないときは場所も取らない（空白が「読み込み損ね」に見えるため）
+  const anyPass = state.computing || nightKeys().some((k) => filteredPasses(k).length > 0);
+  $('view-next').hidden = !(state.data === 'ok' && !state.selected && anyPass);
   $('next-btn').classList.toggle('is-off', nextIdx < 0);
   $('next-btn').dataset.next = String(nextIdx);
   $('view-caption').innerHTML = cap;
@@ -997,6 +1010,8 @@ async function start() {
     if (q) searchPlace(q, setPlace);
   });
   $('geo-btn').addEventListener('click', () => useGeolocation(setPlace));
+  // 帯の「見る場所を選ぶ」：「場所と日時」を開いてから、そこへ移る（移るのはリンクのふつうの動き）
+  $('sat-only-place').addEventListener('click', (e) => { if (e.target.closest('a')) toggleControls(true); });
   $('controls-toggle').addEventListener('click', () => {
     const open = $('controls').classList.contains('is-collapsed');
     toggleControls(open);

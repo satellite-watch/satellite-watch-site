@@ -20,7 +20,7 @@ function card(sat) {
   return `<li id="sat-${sat.id}"><figure class="zukan-card">
     <img class="zukan-photo" src="img/sats/${p.file}" width="${p.w}" height="${p.h}" alt="${esc(displayName(sat))}の${p.kind}" loading="lazy">
     <figcaption class="zukan-body">
-      <h3 class="zukan-name">${esc(displayName(sat))}</h3>${reg}
+      <h2 class="zukan-name">${esc(displayName(sat))}</h2>${reg}
       <dl class="zukan-facts">${facts.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
       <p class="zukan-cap">出典：${esc(p.credit)}</p>
       <a class="btn btn-ghost zukan-go" href="${STATION_PAGES[sat.id] || `index.html?sat=${sat.id}`}">この衛星が見える時間を調べる</a>

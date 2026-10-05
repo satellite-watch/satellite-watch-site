@@ -128,7 +128,7 @@
   <section id="passes" class="card passes" aria-labelledby="h-passes">
     <h2 id="h-passes" class="card-title" tabindex="-1">衛星が見える時間</h2>
     <div id="sat-only" class="sat-only" hidden>
-      <p><b id="sat-only-name"></b>の見える時間だけを表示中<span id="sat-only-low">（低い回も含みます）</span><span id="sat-only-none" class="sat-only-none" hidden></span></p>
+      <p><b id="sat-only-name"></b>の見える時間だけを表示中<span id="sat-only-low">（低い回も含みます）</span><span id="sat-only-none" class="sat-only-none" hidden></span><span id="sat-only-place" class="sat-only-place" hidden>いまは仮に東京（千代田区）から見た時刻と方角です。<a href="#controls">見る場所を選ぶ</a></span></p>
       <button type="button" id="sat-only-clear" class="btn btn-ghost">解除</button>
     </div>
     <div id="night-tabs" class="night-tabs" role="group" aria-label="日付"></div>
@@ -138,13 +138,13 @@
       <label class="chip"><input type="checkbox" id="only-stations"><span><b class="chip-title">宇宙ステーションだけ</b><small class="chip-sub">ISS・天宮（とても明るい）</small></span></label>
     </div>
     <ul class="notice notice-list">
-      <li>下の一覧から見たい時間を押すと、「地図で通り道を見る」ボタンが出ます。</li>
+      <li id="notice-pick">下の一覧から見たい時間を押すと、「地図で通り道を見る」ボタンが出ます。</li>
       <li id="notice-station">宇宙ステーションはとても明るいので、25°以上の回も出します。</li>
     </ul>
     <p id="data-warn" class="warn" hidden></p>
     <p id="passes-status" class="msg" role="status">軌道データを読み込んでいます…</p>
     <ol id="pass-list" class="pass-list"></ol>
-    <button type="button" id="to-top" class="btn to-top" aria-label="見える時間の先頭へ" hidden>↑ 先頭へ</button>
+    <button type="button" id="to-top" class="btn to-top" hidden>↑ 一覧の先頭へ</button>
   </section>
 
   <section id="sky" class="card skyview" aria-labelledby="h-sky">
@@ -153,12 +153,12 @@
     <figure class="sky">
       <svg id="sky-svg" viewBox="-176 -176 352 352" role="img" aria-labelledby="sky-title"><title id="sky-title">空の図</title></svg>
       <div id="sky-tip" class="sky-tip" hidden></div>
-      <figcaption class="hint">円の中心が真上、ふちが地平線です。地面に置いた地図と同じ向き（北が上・東が右）です。見上げるときは、東西が左右逆になります。点に合わせる（スマホはタップする）と衛星名が出ます。<span class="legend"><span><i class="dot dot-station"></i>宇宙ステーション（見えるとき）</span><span><i class="dot dot-vis"></i>見える</span><span><i class="dot dot-shadow"></i>見えない（影に入っている・低すぎる）</span><span><i class="dot dot-selected"></i>選んだ衛星</span><span><i class="line-track"></i>通り道（三角の向きに進む）</span></span></figcaption>
+      <figcaption class="hint">円の中心が真上、ふちが地平線です。地面に置いた地図と同じ向き（北が上・東が右）です。見上げるときは、東西が左右逆になります。点に合わせる（スマホはタップする）と衛星名が出ます。<span class="legend"><span><i class="dot dot-station"></i>宇宙ステーション（見えるとき）</span><span><i class="dot dot-vis"></i>見える</span><span><i class="dot dot-shadow"></i>見えない（影に入っている・低すぎる）</span><span><i class="dot dot-selected"></i>選んだ衛星</span><span><i class="ring-start"></i>現れる位置</span><span><i class="line-track"></i>通り道（三角の向きに進む）</span></span></figcaption>
     </figure>
 
     <h3 class="sub-title">この時刻に空に出ている衛星</h3>
     <ul id="sky-list" class="sky-list"><li>軌道データを読み込んでいます…</li></ul>
-    <button type="button" id="sky-top" class="btn to-top" aria-label="空の図の先頭へ" hidden>↑ 先頭へ</button>
+    <button type="button" id="sky-top" class="btn to-top" hidden>↑ 空の図の先頭へ</button>
   </section>
 </div>
 

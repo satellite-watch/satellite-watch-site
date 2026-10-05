@@ -92,7 +92,7 @@ a { color: var(--link); }
 .mapview { grid-area: map; }
 .passes { grid-area: passes; }
 .skyview { grid-area: sky; }
-.mapview, .passes, .skyview, .faq { scroll-margin-top: 72px; }
+.controls, .mapview, .passes, .skyview, .faq { scroll-margin-top: 72px; }
 /* カードは入力する「場所と日時」だけ。見る部分（地図・一覧・空の図）は枠なしにそろえる */
 .card.mapview, .card.passes, .card.skyview { background: transparent; border: 0; padding: 0; }
 .controls-grid { display: grid; gap: 0 24px; grid-template-columns: minmax(0, 1fr); } /* minmax(0, …)：日時の欄の最小幅に押されて、カードから右へはみ出さないようにする */
@@ -179,6 +179,8 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .sat-only p b { font-size: 16px; }
 .sat-only-none { display: block; margin-top: 2px; font-weight: 700; }
 .sat-only-none[hidden] { display: none; }
+.sat-only-place { display: block; margin-top: 2px; } /* 図鑑や検索から初めて来た人に、仮の場所（東京）の予報だと伝える */
+.sat-only-place[hidden] { display: none; }
 .msg.is-notice { color: var(--text); }
 @media (max-width: 359px) { .sat-only { flex-wrap: wrap; } .sat-only .btn { width: 100%; } }
 .sat-only .btn { flex: none; min-width: 0; font-size: 15px; }
@@ -283,6 +285,7 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .sky-deg { fill: var(--text-dim); font-size: 16px; paint-order: stroke; stroke: var(--sky); stroke-width: 3px; } /* 幅320pxで図が縮んでも12pxを下回らない大きさ */
 .sky-track { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
 .sky-dot-vis { fill: var(--accent); }
+.sky-start { fill: var(--sky); stroke: var(--accent); stroke-width: 2.5; } /* 選んだ回の現れる位置。中を塗らない輪にして、見える衛星（黄色の丸）と見分ける */
 .sky-dot-station { fill: var(--station); }
 .sky-dot-shadow { fill: var(--shadow-sat); }
 .sky-label { fill: var(--text); font-size: 16px; paint-order: stroke; stroke: var(--sky); stroke-width: 3px; }
@@ -292,6 +295,7 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .legend { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; margin-left: 4px; }
 p.legend { display: flex; margin-left: 0; }
 .dot-observer { background: var(--observer); box-shadow: 0 0 0 2px var(--white); }
+.ring-start { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--accent); margin-right: 4px; vertical-align: -1px; } /* 空の図の「現れる位置」 */
 .ring-observer { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 2px dashed var(--observer); margin-right: 4px; vertical-align: -2px; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
 .dot-vis { background: var(--accent); }
@@ -306,6 +310,9 @@ p.legend { display: flex; margin-left: 0; }
 .dot-big { width: 12px; height: 12px; background: transparent; border: 2px solid var(--text); }
 .dot-small { width: 6px; height: 6px; background: transparent; border: 2px solid var(--text); }
 .dot-selected { background: var(--white); box-shadow: 0 0 0 2px var(--accent); }
+/* 凡例の点の大きさも図に合わせる（見えない＝小さい、宇宙ステーション＝大きい）。色の見分けが苦手な人の手がかりに */
+.legend .dot-shadow { width: 7px; height: 7px; }
+.legend .dot-station { width: 12px; height: 12px; }
 .line-track { display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: var(--accent); margin-right: 4px; vertical-align: 3px; }
 
 /* 地図の色分けの切り替え */
@@ -362,7 +369,7 @@ p.legend { display: flex; margin-left: 0; }
 .sky-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .sky-list li { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
 .sky-list li:last-child { border-bottom: 0; }
-.sky-list .nm { font-weight: 600; flex: 1 1 12em; }
+.sky-list .nm { font-weight: 600; flex: 1 1 100%; } /* 方角・高さと状態は、いつも2行目の左から並べる（名前の長さで位置がずれないように） */
 .sky-list .kind { display: block; font-size: 13px; font-weight: 400; color: var(--text-dim); }
 .sky-list .pos { color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .state-vis { color: var(--accent); }
@@ -393,6 +400,7 @@ p.legend { display: flex; margin-left: 0; }
 /* 本文の先頭の大見出しと説明。地図を早く見せるため短くする */
 .station-intro { padding-top: 16px; }
 .station-title { margin: 0; font-size: 24px; line-height: 1.4; }
+.nowrap { display: inline-block; } /* 「（中国の宇宙ステーション）」などを途中で改行しない */
 .station-lead { margin: 6px 0 0; max-width: 40em; font-size: 16px; line-height: 1.7; color: var(--text-dim); }
 .faq-list .about-src { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.7; color: var(--text-dim); }
 @media (min-width: 600px) { .station-title { font-size: 28px; } } /* PC はサイト名（26px）より大きくし、このページの題名だと分かるように */
