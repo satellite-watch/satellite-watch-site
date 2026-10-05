@@ -82,7 +82,7 @@ function setPlace(p) {
   $('place-notice').hidden = true;
   $('place-name').textContent = p.name;
   updateSummary();
-  toggleControls(false);
+  // スマホでも「場所と日時」は開いたままにする（続けて日時も変えられるように。閉じるのは「閉じる」ボタンで。2026-10-05 オーナー判断）
   $('place-results').hidden = true;
   state.selected = null;
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、新しい場所でその衛星が見える最初の夜を選び直す
