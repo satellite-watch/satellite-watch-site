@@ -103,7 +103,7 @@ a { color: var(--link); }
 .controls:not(.is-collapsed) .controls-summary { margin-bottom: 12px; }
 .controls.is-collapsed .controls-grid { display: none; }
 .controls.is-collapsed #place-notice { display: none; } /* 畳んでいるときは、要約の「仮に…で表示しています」で伝える（宇宙ステーションのページ） */
-.to-map { justify-self: start; margin-top: 16px; } /* 場所を選んだあと、地図へひと押しで移る（スマホだけ。PC は地図がすぐ下に見えている） */
+.to-map { justify-self: stretch; margin-top: 24px; } /* 場所や日時を変えたあと、欄のいちばん下から地図へひと押しで移る（スマホ・タブレットだけ）。欄と欄の間より広く空けて「締めくくりの操作」と分かるように。横幅いっぱいで、一覧の「地図で通り道を見る」とそろえる */
 .to-map[hidden] { display: none; }
 .controls .current-place { display: none; } /* スマホは要約に場所が出ているので出さない */
 .controls.is-collapsed .card-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

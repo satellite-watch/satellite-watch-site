@@ -86,7 +86,9 @@ function setPlace(p) {
   $('place-results').hidden = true;
   // 欄が開いたままなので、切り替わったことを一言で知らせる（#place-msg は読み上げにも伝わる）
   $('place-msg').classList.remove('is-error');
-  $('place-msg').textContent = `${p.name}の予報に切り替えました。続けて日時も変えられます。`;
+  // スマホでは「地図を見る ↓」が欄のいちばん下にあり、小さい画面では画面の外になるので、ありかも伝える（PC は地図がすぐ下に見えている）
+  const small = !window.matchMedia('(min-width: 960px)').matches;
+  $('place-msg').textContent = `${p.name}の予報に切り替えました。日時も変えられます。${small ? '地図は、この欄のいちばん下の「地図を見る ↓」から。' : ''}`;
   $('to-map').hidden = false; // スマホだけに出る（CSS）。地図へひと押しで移れるように
   state.selected = null;
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、新しい場所でその衛星が見える最初の夜を選び直す
