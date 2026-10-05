@@ -133,8 +133,8 @@ export async function searchPlace(q, onPick) {
       const b = e.target.closest('button');
       if (!b) return;
       const p = top[+b.dataset.i];
+      msg.textContent = ''; // 選ぶ側（onPick）が案内を出すことがあるので、先に消す
       onPick({ name: p.name, lat: p.lat, lon: p.lon });
-      msg.textContent = '';
     };
     msg.textContent = ranked.length > 8
       ? `${ranked.length}件見つかりました。上から8件を出しています。選んでください。`
@@ -161,8 +161,8 @@ export function useGeolocation(onPick) {
       // 約1kmに丸める（予報には十分。細かい位置を端末に残さないため）
       const lat = Math.round(pos.coords.latitude * 100) / 100;
       const lon = Math.round(pos.coords.longitude * 100) / 100;
+      msg.textContent = ''; // 選ぶ側（onPick）が案内を出すことがあるので、先に消す
       onPick({ name: `現在地（北緯${lat.toFixed(2)}°・東経${lon.toFixed(2)}°）`, lat, lon });
-      msg.textContent = '';
     },
     (err) => {
       msg.classList.add('is-error');
