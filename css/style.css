@@ -107,6 +107,7 @@ a { color: var(--link); }
 .to-list[hidden] { display: none; }
 .controls .current-place { display: none; } /* スマホは要約に場所が出ているので出さない */
 /* 畳んでいるときも「場所と日時」の見出しは出す（何の欄か分かるように。ほかの欄も見出しが出ている。2026-10-07 オーナーの提案） */
+.controls.is-collapsed .card-title { margin-bottom: 4px; } /* 畳んでいるときは見出しと要約を近づけ、一覧を早く見せる */
 .controls-grid .field { margin-bottom: 0; }
 .controls-grid .field + .field { margin-top: 12px; }
 
@@ -410,7 +411,7 @@ p.legend { display: flex; margin-left: 0; }
 .station-intro { padding-top: 16px; }
 .station-title { margin: 0; font-size: 26px; line-height: 1.4; } /* 下の「見える日と時刻」（22px）とはっきり差をつける */
 .nowrap { display: inline-block; } /* 「（中国の宇宙ステーション）」などを途中で改行しない */
-@media (max-width: 359px) { .station-title { font-size: 22px; } .station-title .nowrap { font-feature-settings: "palt"; } } /* 320px でも1行に収める（かっこを半分の幅に詰める） */
+@media (max-width: 359px) { .station-title { font-size: 22px; } .station-title .nowrap { font-feature-settings: "palt"; } .card-title { font-size: 20px; } } /* 欄の見出しはページの題名（22px）より小さく */ /* 320px でも1行に収める（かっこを半分の幅に詰める） */
 .station-lead { margin: 6px 0 0; max-width: 40em; font-size: 16px; line-height: 1.7; color: var(--text-dim); }
 .faq-list .about-src { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.7; color: var(--text-dim); }
 @media (min-width: 600px) { .station-title { font-size: 28px; } } /* PC はサイト名（26px）より大きくし、このページの題名だと分かるように */
