@@ -1099,12 +1099,10 @@ async function start() {
   $('passes-status').textContent = '軌道データを読み込んでいます…';
   $('place-name').textContent = state.place.name;
   updateSummary();
-  // 初めて来た人には、仮の場所だと伝えて「場所と日時」を開いておく。
-  // ただし宇宙ステーションのページは閉じたままにし、要約で仮の場所だと伝える（検索で来た人に、まず地図と「いつ見えるか」を見せるため。2026-10-05 オーナー判断）
-  if (state.firstVisit) {
-    $('place-notice').hidden = false;
-    if (!FIXED_SAT) toggleControls(true);
-  }
+  // 「場所と日時」は最初は開いておく（2026-10-07 オーナー判断。絞り込みと同じく、変えられることに気づけるように。前は初めて来た人だけ開いていた）。
+  // ただし宇宙ステーションのページは閉じたままにし、要約で仮の場所だと伝える（検索で来た人に、まず「いつ見えるか」を見せるため。2026-10-05 オーナー判断）
+  if (state.firstVisit) $('place-notice').hidden = false;
+  if (!FIXED_SAT) toggleControls(true);
   setTimeLimits();
   $('time-input').value = toInputValue(state.baseTime);
 
