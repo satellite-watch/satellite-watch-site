@@ -239,8 +239,9 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
   box-shadow: 0 0 0 4px var(--bg), 0 4px 12px color-mix(in srgb, var(--bg) 80%, transparent);
 }
 .to-top[hidden] { display: none; }
-/* スマホ・タブレットでは一覧が地図より上にあるので、「↑ 一覧の先頭へ」の出し入れで地図以下が60px動かないよう、隠れているときも場所を取っておく */
-@media (max-width: 959px) { #to-top[hidden] { display: block; visibility: hidden; } }
+/* スマホ・タブレットでは出さない（2026-10-07 オーナー判断。上の移動ボタン「見える時間」「空の図」と行き先が同じで、札の最後の行（どの方角へ消えるか）を隠していたため）。
+   出し入れがないので、地図以下が動くこともない */
+@media (max-width: 959px) { .to-top, .to-top[hidden] { display: none; } }
 #h-passes:focus, #h-sky:focus, #h-view:focus { outline: none; } /* 戻ったときに見出しへ操作位置を移すだけなので、枠は出さない */
 #h-passes:focus-visible, #h-sky:focus-visible, #h-view:focus-visible { outline: 3px solid var(--focus); }
 /* 回と回の間を広めに取り、1件ずつ区切って読みやすくする */
