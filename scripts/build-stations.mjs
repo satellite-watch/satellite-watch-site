@@ -94,6 +94,8 @@ for (const s of STATIONS) {
   h = swap(h, '<label class="chip"><input type="checkbox" id="only-big" checked>', '<label class="chip" hidden><input type="checkbox" id="only-big" checked>');
   h = swap(h, '<label class="chip"><input type="checkbox" id="only-stations">', '<label class="chip" hidden><input type="checkbox" id="only-stations">');
   h = swap(h, '<small class="chip-sub">高さ40°以上を通る</small>', '<small class="chip-sub">高さ25°以上を通る</small>');
+  // 絞り込みの要約の最初の文字も、このページの最初の状態（低い回も含めて出す）に合わせる。プログラムが書き換えるまでの一瞬、隠した「明るい衛星だけ」が見えないように
+  h = swap(h, /<b id="filters-sum">[\s\S]*?<\/b>/, '<b id="filters-sum"><span class="nowrap">なし</span><span class="nowrap">（低い回も表示）</span></b>');
   // 地図の凡例の「見える範囲の目安」の輪は ISS の高さで描いている。天宮（約390km）でもほぼ同じなので、言葉だけ合わせる
   if (s.id !== 25544) h = h.replaceAll('ISSが入ってくると見える範囲の目安', '宇宙ステーションが入ってくると見える範囲の目安（ISS の高さで描いた目安）');
   // ページの下の宇宙ステーションへのリンクのうち、いま見ているページ自身はリンクにしない（押すと選んだ場所や回が消えるため）

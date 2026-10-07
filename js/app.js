@@ -432,10 +432,11 @@ function renderPasses() { keepViewWhile(renderPassesInner); }
 function updateFilterSummary() {
   const on = [...document.querySelectorAll('.filters .chip:not([hidden]) input:checked')]
     .map((i) => i.closest('.chip').querySelector('.chip-title').textContent);
-  // 名前の途中で改行しないよう1つずつ包む（名前はページの中の決まった文字なので、そのまま入れてよい）。
-  // 1機だけ出しているときは「すべての回」と言うと帯と食い違うので、「低い回も表示」と言う
-  $('filters-sum').innerHTML = on.length ? on.map((t) => `<span class="nowrap">${t}</span>`).join('・')
-    : state.onlySat ? 'なし（低い回も表示）' : 'なし（すべての回を表示）';
+  // 条件1つにつき1行（2026-10-07 オーナー判断。スマホはどのみち条件の間で折り返すので高さは変わらず、行頭や行末に「・」が残らない）。
+  // 名前の途中で改行しないよう1つずつ包む（名前はページの中の決まった文字なので、そのまま入れてよい）。読み上げで区切れるよう、見えない「、」を挟む。
+  // 1機だけ出しているときは「すべての回」と言うと帯と食い違うので、「低い回も表示」と言う。「なし」と「（…）」の間でだけ折り返す
+  $('filters-sum').innerHTML = on.length ? on.map((t) => `<span class="nowrap">${t}</span>`).join('<span class="sr-only">、</span><br>')
+    : `<span class="nowrap">なし</span><span class="nowrap">（${state.onlySat ? '低い回も表示' : 'すべての回を表示'}）</span>`;
 }
 function toggleFilters(open) {
   $('filters-box').classList.toggle('is-collapsed', !open);
