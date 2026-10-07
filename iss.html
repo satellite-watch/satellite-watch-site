@@ -93,15 +93,24 @@
       <a id="sat-only-clear" class="btn btn-ghost" href="index.html">ほかの衛星も見る</a>
     </div>
     <div id="night-tabs" class="night-tabs" role="group" aria-label="日付"></div>
-    <div class="filters" role="group" aria-label="絞り込み">
-      <label class="chip" hidden><input type="checkbox" id="only-big" checked><span><b class="chip-title">明るい衛星だけ</b><small class="chip-sub">街中でも見つけやすい約40機</small></span></label>
-      <label class="chip"><input type="checkbox" id="only-easy" checked><span><b class="chip-title">見やすい回だけ</b><small class="chip-sub">高さ25°以上を通る</small></span></label>
-      <label class="chip" hidden><input type="checkbox" id="only-stations"><span><b class="chip-title">宇宙ステーションだけ</b><small class="chip-sub">ISS・天宮（とても明るい）</small></span></label>
+    <!-- 絞り込みと案内は、スマホ・タブレットでは畳んでおき「変える」で開く（2026-10-07 オーナー判断。一覧の回を早く見せるため。日付のタブは出したまま）。PC はいつも開いている -->
+    <div id="filters-box" class="filters-box is-collapsed">
+      <div class="filters-summary">
+        <p>絞り込み：<b id="filters-sum">明るい衛星だけ・見やすい回だけ</b></p>
+        <button type="button" id="filters-toggle" class="btn btn-ghost" aria-expanded="false" aria-controls="filters-body">変える</button>
+      </div>
+      <div id="filters-body" class="filters-body">
+      <div class="filters" role="group" aria-label="絞り込み">
+        <label class="chip" hidden><input type="checkbox" id="only-big" checked><span><b class="chip-title">明るい衛星だけ</b><small class="chip-sub">街中でも見つけやすい約40機</small></span></label>
+        <label class="chip"><input type="checkbox" id="only-easy" checked><span><b class="chip-title">見やすい回だけ</b><small class="chip-sub">高さ25°以上を通る</small></span></label>
+        <label class="chip" hidden><input type="checkbox" id="only-stations"><span><b class="chip-title">宇宙ステーションだけ</b><small class="chip-sub">ISS・天宮（とても明るい）</small></span></label>
+      </div>
+      <ul class="notice notice-list">
+        <li id="notice-pick">下の一覧から見たい時間を押すと、「地図で通り道を見る」ボタンが出ます。</li>
+        <li id="notice-station">宇宙ステーションはとても明るいので、25°以上の回も出します。</li>
+      </ul>
+      </div>
     </div>
-    <ul class="notice notice-list">
-      <li id="notice-pick">下の一覧から見たい時間を押すと、「地図で通り道を見る」ボタンが出ます。</li>
-      <li id="notice-station">宇宙ステーションはとても明るいので、25°以上の回も出します。</li>
-    </ul>
     <p id="data-warn" class="warn" hidden></p>
     <p id="passes-status" class="msg" role="status">軌道データを読み込んでいます…</p>
     <ol id="pass-list" class="pass-list"></ol>

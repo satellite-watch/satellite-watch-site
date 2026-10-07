@@ -396,7 +396,19 @@ function keepViewWhile(fn) {
   if (keep) window.scrollBy({ top: $('view').getBoundingClientRect().top - before, behavior: 'instant' });
 }
 function renderPasses() { keepViewWhile(renderPassesInner); }
+// 絞り込みの要約（スマホで畳んでいるときに出す）。隠している絞り込み（宇宙ステーションのページ）は数えない
+function updateFilterSummary() {
+  const on = [...document.querySelectorAll('.filters .chip:not([hidden]) input:checked')]
+    .map((i) => i.closest('.chip').querySelector('.chip-title').textContent);
+  $('filters-sum').textContent = on.length ? on.join('・') : 'なし（すべての回を表示）';
+}
+function toggleFilters(open) {
+  $('filters-box').classList.toggle('is-collapsed', !open);
+  $('filters-toggle').setAttribute('aria-expanded', String(open));
+  $('filters-toggle').textContent = open ? '閉じる' : '変える';
+}
 function renderPassesInner() {
+  updateFilterSummary();
   const list = filteredPasses(state.night);
   const status = $('passes-status');
   status.classList.remove('is-error', 'is-notice');
@@ -1102,6 +1114,7 @@ async function start() {
     $('passes').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     $('h-passes').focus({ preventScroll: true });
   });
+  $('filters-toggle').addEventListener('click', () => toggleFilters($('filters-box').classList.contains('is-collapsed')));
   $('controls-toggle').addEventListener('click', () => {
     const open = $('controls').classList.contains('is-collapsed');
     toggleControls(open);
