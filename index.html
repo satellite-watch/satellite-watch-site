@@ -88,11 +88,11 @@
       <button type="button" id="sat-only-clear" class="btn btn-ghost">解除</button>
     </div>
     <div id="night-tabs" class="night-tabs" role="group" aria-label="日付"></div>
-    <!-- 絞り込みと案内は、スマホ・タブレットでは畳んでおき「変える」で開く（2026-10-07 オーナー判断。一覧の回を早く見せるため。日付のタブは出したまま）。PC はいつも開いている -->
-    <div id="filters-box" class="filters-box is-collapsed">
+    <!-- 絞り込みと案内は、スマホ・タブレットでは「閉じる」で畳める（2026-10-07 オーナー判断）。最初は開いておく（絞れること・回を押せることに気づけるように。同日オーナー判断）。日付のタブは畳まない。PC はいつも開いている -->
+    <div id="filters-box" class="filters-box">
       <div class="filters-summary">
         <p>絞り込み：<b id="filters-sum">明るい衛星だけ・見やすい回だけ</b></p>
-        <button type="button" id="filters-toggle" class="btn btn-ghost" aria-expanded="false" aria-controls="filters-body"><span class="sr-only">絞り込みを</span><span id="filters-toggle-label">変える</span></button>
+        <button type="button" id="filters-toggle" class="btn btn-ghost" aria-expanded="true" aria-controls="filters-body"><span class="sr-only">絞り込みを</span><span id="filters-toggle-label">閉じる</span></button>
       </div>
       <div id="filters-body" class="filters-body">
       <div class="filters" role="group" aria-label="絞り込み">
