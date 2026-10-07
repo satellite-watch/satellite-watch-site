@@ -152,7 +152,8 @@ input[type="search"], input[type="datetime-local"] {
 .btn-ghost { color: var(--text); background: transparent; border-color: var(--line-strong); font-weight: 500; }
 .btn-ghost.is-current { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); } /* 「現在地」を使っているあいだ。塗らずに枠だけ黄色（隣の「探す」の黄色の塗りと見分ける） */
 .geo-check { margin-right: 6px; color: var(--accent); font-weight: 700; }
-#geo-btn { min-width: 7em; } /* ✓が出入りしても幅が変わらないように（PC・タブレットで入力欄が伸び縮みしない） */
+#geo-btn { min-width: 7em; }
+#now-btn { min-width: 4.5em; } /* 「✓ 今」が入っても幅が変わらないように */ /* ✓が出入りしても幅が変わらないように（PC・タブレットで入力欄が伸び縮みしない） */
 .btn:disabled { opacity: .5; cursor: default; }
 /* リンクをボタンの形で出すとき（下線を消し、文字を上下左右の中央に） */
 a.btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }

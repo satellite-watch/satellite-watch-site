@@ -84,6 +84,13 @@ function markGeoBtn(on) {
   $('geo-btn').innerHTML = on ? '<span class="geo-check" aria-hidden="true">✓</span>現在地<span class="sr-only">（使用中）</span>' : '現在地';
 }
 
+// 「今」の日時で予報を出しているあいだは「今」ボタンにも「✓」と黄色の枠を付ける（2026-10-07 オーナーの提案。「現在地」と同じ見せ方）。
+// 開いたとき（いまの日時で始まる）と「今」を押したときに付け、日時の欄で別の日時を選んだら外す
+function markNowBtn(on) {
+  $('now-btn').classList.toggle('is-current', on);
+  $('now-btn').innerHTML = on ? '<span class="geo-check" aria-hidden="true">✓</span>今<span class="sr-only">（使用中）</span>' : '今';
+}
+
 function setPlace(p) {
   state.place = p;
   savePlace(p);
@@ -1091,8 +1098,8 @@ async function start() {
     const open = $('controls').classList.contains('is-collapsed');
     toggleControls(open);
   });
-  $('now-btn').addEventListener('click', () => { setTimeLimits(); $('time-msg').textContent = ''; setBaseTime(Date.now()); $('to-list').hidden = false; });
-  $('time-input').addEventListener('change', (e) => { onTimeInput(e.target.value); $('to-list').hidden = false; }); // 日時を変えたあとも一覧へ移れるように
+  $('now-btn').addEventListener('click', () => { setTimeLimits(); $('time-msg').textContent = ''; setBaseTime(Date.now()); markNowBtn(true); $('to-list').hidden = false; });
+  $('time-input').addEventListener('change', (e) => { onTimeInput(e.target.value); markNowBtn(false); $('to-list').hidden = false; }); // 日時を変えたあとも一覧へ移れるように
   $('night-tabs').addEventListener('click', (e) => {
     const b = e.target.closest('.night-tab');
     if (!b) return;
@@ -1184,6 +1191,7 @@ async function start() {
     return;
   }
   setBaseTime(state.baseTime);
+  markNowBtn(true); // 開いたときは、いまの日時で予報を出している
 }
 
 start();
