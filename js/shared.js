@@ -15,15 +15,6 @@ export function jstParts(ms) {
   return { y: d.getUTCFullYear(), mo: d.getUTCMonth() + 1, d: d.getUTCDate(), h: d.getUTCHours(), mi: d.getUTCMinutes(), w: d.getUTCDay() };
 }
 export const pad = (n) => String(n).padStart(2, '0');
-export function toInputValue(ms) {
-  const p = jstParts(ms);
-  return `${p.y}-${pad(p.mo)}-${pad(p.d)}T${pad(p.h)}:${pad(p.mi)}`;
-}
-export function fromInputValue(v) {
-  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(v);
-  if (!m) return null;
-  return Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) - JST;
-}
 export const hm = (ms) => { const p = jstParts(ms); return `${p.h}:${pad(p.mi)}`; };
 export const md = (ms) => { const p = jstParts(ms); return `${p.mo}月${p.d}日（${WEEK[p.w]}）`; };
 export const mdShort = (ms) => { const p = jstParts(ms); return `${p.mo}/${p.d}（${WEEK[p.w]}）`; };

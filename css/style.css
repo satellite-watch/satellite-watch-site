@@ -85,7 +85,7 @@ a { color: var(--link); }
 
 .layout {
   display: grid; gap: 32px var(--gap); padding-top: 16px; padding-bottom: 24px;
-  grid-template-areas: "controls" "passes" "map" "sky"; /* スマホ・タブレットは「場所と日時→見える時間→地図→空の図」と使う順に並べる（2026-10-06 オーナー判断）。PC は下で地図を上にする */
+  grid-template-areas: "controls" "passes" "map" "sky"; /* スマホ・タブレットは「場所→見える時間→地図→空の図」と使う順に並べる（2026-10-06 オーナー判断）。PC は下で地図を上にする */
   grid-template-columns: minmax(0, 1fr);
 }
 .controls { grid-area: controls; }
@@ -93,23 +93,22 @@ a { color: var(--link); }
 .passes { grid-area: passes; }
 .skyview { grid-area: sky; }
 .controls, .mapview, .passes, .skyview, .faq { scroll-margin-top: 72px; }
-/* カードは入力する「場所と日時」だけ。見る部分（地図・一覧・空の図）は枠なしにそろえる */
+/* カードは入力する「場所」の欄だけ。見る部分（地図・一覧・空の図）は枠なしにそろえる */
 .card.mapview, .card.passes, .card.skyview { background: transparent; border: 0; padding: 0; }
-.controls-grid { display: grid; gap: 0 24px; grid-template-columns: minmax(0, 1fr); } /* minmax(0, …)：日時の欄の最小幅に押されて、カードから右へはみ出さないようにする */
-/* スマホ：一覧と地図を早く見せるため、場所と日時は要約だけにしておき「変える」で開く */
+.controls-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
+/* スマホ：「場所」の欄は要約と「変える ▾／閉じる ▴」で畳める */
 .controls-summary { display: flex; align-items: center; gap: 12px; }
 .controls-summary p { flex: 1; min-width: 0; margin: 0; font-size: 15px; line-height: 1.5; color: var(--text-dim); }
 .controls-summary strong { color: var(--text); font-size: 16px; }
 .controls:not(.is-collapsed) .controls-summary { margin-bottom: 12px; }
 .controls.is-collapsed .controls-grid { display: none; }
 .controls.is-collapsed #place-notice { display: none; } /* 畳んでいるときは、要約の「仮に…で表示しています」で伝える（宇宙ステーションのページ） */
-.to-list { justify-self: stretch; margin-top: 24px; } /* 場所や日時を変えたあと、欄のいちばん下から見える時間（一覧）へひと押しで移る（スマホ・タブレットだけ）。欄と欄の間より広く空けて「締めくくりの操作」と分かるように。横幅いっぱいで、一覧の「地図で通り道を見る」とそろえる */
+.to-list { justify-self: stretch; margin-top: 24px; } /* 場所を変えたあと、欄のいちばん下から見える時間（一覧）へひと押しで移る（スマホ・タブレットだけ）。欄と欄の間より広く空けて「締めくくりの操作」と分かるように。横幅いっぱいで、一覧の「地図で通り道を見る」とそろえる */
 .to-list[hidden] { display: none; }
 .controls .current-place { display: none; } /* スマホは要約に場所が出ているので出さない */
-/* 畳んでいるときも「場所と日時」の見出しは出す（何の欄か分かるように。ほかの欄も見出しが出ている。2026-10-07 オーナーの提案） */
+/* 畳んでいるときも「場所」の見出しは出す（何の欄か分かるように。ほかの欄も見出しが出ている。2026-10-07 オーナーの提案） */
 .controls.is-collapsed .card-title { margin-bottom: 4px; } /* 畳んでいるときは見出しと要約を近づけ、一覧を早く見せる */
 .controls-grid .field { margin-bottom: 0; }
-.controls-grid .field + .field { margin-top: 12px; }
 
 .card {
   background: var(--surface);
@@ -125,7 +124,7 @@ a { color: var(--link); }
 .label { display: block; font-size: 15px; margin-bottom: 4px; color: var(--text); }
 .row { display: flex; gap: 8px; }
 .row > input { flex: 1; min-width: 0; }
-input[type="search"], input[type="datetime-local"] {
+input[type="search"] {
   min-height: 48px; padding: 8px 12px;
   font: inherit; font-size: 16px; color: var(--text);
   background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
@@ -496,12 +495,12 @@ p.legend { display: flex; margin-left: 0; }
     align-items: start;
   }
   .controls-grid { grid-template-columns: minmax(0, 1fr); } /* 日時の欄をなくしたので1列（2026-10-07） */
-  #place-form { max-width: 40em; } /* 入力欄が横に長くなりすぎないように */
+  #place-form, #place-notice { max-width: 40em; } /* 入力欄が横に長くなりすぎないように。案内の枠も右端をそろえる */
+  #place-msg:not(.is-error) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } /* PC は「選んでいる場所」に地名が出るので、切り替えの一言は読み上げだけに（失敗の知らせは見せる） */
   .controls-summary { display: none; }
   .controls .current-place { display: block; }
   .controls.is-collapsed .controls-grid { display: grid; }
   .controls.is-collapsed #place-notice:not([hidden]) { display: block; } /* PC は畳まないので、案内も出す */
-  .controls-grid .field + .field { margin-top: 0; }
   #map { height: 560px; }
   /* PC は地図の上を「説明（左）｜色分け（右）」の2列にし、凡例はその下に横幅いっぱいで1行に。縦を詰めて地図を上げる */
   .mapview {

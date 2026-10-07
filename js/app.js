@@ -13,7 +13,6 @@ import { PHOTOS } from './images.js';
 // 予報を出すのは「今夜から7夜分」まで（今日から7日先の朝まで）。先ほど軌道の予報がずれやすいため。
 // 先の日付を選ぶと、その分だけ夜の数が減る（2026-09-29 オーナー判断）
 const NIGHTS = 7;
-const PAST_DAYS = 3; // 選べる日付：今日の3日前から
 const EASY_EL = 40; // 見やすい回＝最も高いところが40°以上（宇宙ステーションは STATION_MIN_EL）
 const ISS_RANGE_KM = 1390; // 高さ約420kmのISSが高さ10°以上に見える範囲の目安
 // 宇宙ステーションのページ（iss.html・tiangong.html）では、その衛星の回だけをいつも出す（<body data-sat="番号">）
@@ -85,10 +84,37 @@ function markGeoBtn(on) {
 }
 
 // 予報はいつも開いた時刻から出す（日時の欄はなくした。2026-10-07 オーナー判断）。
-// 開いたまま時間がたってからこのページに戻ってきたときは、いまの時刻で取り直す（終わった回が残らないように）。
-// iPhone はタブを開いたまま戻ると読み込み直さないため。見ているあいだは取り直さない（選んだ回が消えないように）
-function refreshIfStale() {
-  if (state.data === 'ok' && Date.now() - state.baseTime > 30 * 60000) setBaseTime(Date.now());
+// 開いたまま時間がたってからこのページに戻ってきたときは、いまの時刻で取り直す（iPhone はタブに戻っても読み込み直さないため）。
+// 選んでいた回がまだ終わっていなければ選び直し、選んでいた夜も残す（見上げる直前に戻ってきて、選んだ回が消えないように。
+// 2026-10-07 sat-reviewer の指摘）。3時間以上たっていれば軌道データも読み直す（失敗したら今のデータのまま）
+async function refreshIfStale() {
+  if (state.data !== 'ok' || state.refreshing || Date.now() - state.baseTime < 30 * 60000) return;
+  state.refreshing = true;
+  if (Date.now() - state.loadedAt > 3 * 3600000) {
+    try { applySatData(await loadSatData()); } catch { /* 読み直せなければ今のデータで続ける */ }
+  }
+  showDataAge(state.lastData); // データが古くなっていれば注意を出す
+  const sel = state.selected;
+  const restore = { night: state.night, satId: sel?.satId, t: sel?.start.t };
+  setBaseTime(Date.now());
+  state.restore = restore;
+  state.refreshing = false;
+}
+
+// 軌道データを読む・計算係に渡す（開いたときと、時間がたって戻ってきたとき）
+async function loadSatData() {
+  const res = await fetch('data/sats.json', { cache: 'no-cache' });
+  if (!res.ok) throw new Error(res.status);
+  return res.json();
+}
+function applySatData(data) {
+  state.sats = data.sats.map(makeSat);
+  state.satById.clear();
+  state.sats.forEach((s) => state.satById.set(s.id, s));
+  worker.postMessage({ type: 'data', sats: data.sats });
+  state.lastData = data;
+  state.loadedAt = Date.now();
+  showDataAge(data);
 }
 
 function setPlace(p) {
@@ -116,7 +142,9 @@ function setPlace(p) {
 // スマホで畳んでいる「場所」の欄の要約と開け閉め
 function updateSummary() {
   // 仮の場所（東京）のときは、畳んでいるあいだだけ要約で伝える（開いているときは上の案内の枠で伝えている）
-  $('sum-place').textContent = state.firstVisit && $('controls').classList.contains('is-collapsed') ? '仮に東京（千代田区）で表示しています' : state.place.name;
+  // 仮の場所のときは「東京（千代田区）」を途中で割らない（狭い画面で「千代田／区」と切れないように）
+  if (state.firstVisit && $('controls').classList.contains('is-collapsed')) $('sum-place').innerHTML = '仮に<span class="nowrap">東京（千代田区）</span>で表示しています';
+  else $('sum-place').textContent = state.place.name;
   $('sum-msg').textContent = state.data === 'error' ? '軌道データを読み込めませんでした' : '';
 }
 function toggleControls(open) {
@@ -154,9 +182,18 @@ worker.onmessage = (e) => {
       if (state.scrollToList) $('passes').scrollIntoView({ behavior: 'auto', block: 'start' });
       state.scrollToList = false;
     }
+    // 戻ってきて取り直したとき：選んでいた夜がまだあれば残し、選んでいた回がまだ終わっていなければ選び直す
+    let again = null;
+    if (state.restore) {
+      const { night, satId, t } = state.restore;
+      state.restore = null;
+      if (keys.includes(night)) state.night = night;
+      if (satId) again = state.passes.find((p) => p.satId === satId && Math.abs(p.start.t - t) < 60000 && p.end.t > Date.now()) || null;
+    }
     renderNightTabs();
     renderPasses();
     renderView(); // 「次に見える回」の案内を出すため
+    if (again) showPass(again);
   }
 };
 worker.onerror = () => {
@@ -236,6 +273,7 @@ function filteredPasses(key, f = {}) {
 }
 // いまの絞り込み（見やすい回だけ・明るい衛星だけ・宇宙ステーションだけ）に合う回か
 function matchesFilters(p, f = {}) {
+  if (p.end.t < Date.now()) return false; // もう終わった回は出さない（開いたまま時間がたったとき）
   const minEl = f.minEl ?? state.minEl;
   const onlyBig = f.onlyBig ?? state.onlyBig;
   const onlyStations = f.onlyStations ?? state.onlyStations;
@@ -1172,14 +1210,8 @@ async function start() {
   renderView(); // 読み込み中も、空の図の枠と案内を先に出しておく
 
   try {
-    const res = await fetch('data/sats.json', { cache: 'no-cache' });
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    state.sats = data.sats.map(makeSat);
-    state.sats.forEach((s) => state.satById.set(s.id, s));
-    worker.postMessage({ type: 'data', sats: data.sats });
+    applySatData(await loadSatData());
     state.data = 'ok';
-    showDataAge(data);
     applySatFromUrl();
   } catch {
     state.data = 'error';
