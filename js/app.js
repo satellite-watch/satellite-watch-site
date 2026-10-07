@@ -91,6 +91,12 @@ function markNowBtn(on) {
   $('now-btn').innerHTML = on ? '<span class="geo-check" aria-hidden="true">✓</span>今<span class="sr-only">（使用中）</span>' : '今';
 }
 
+// 開いたまま時間がたつと、予報の起点（開いた時刻・「今」を押した時刻）は古いままなので、「✓ 今」を外す（10分を目安に）。
+// iPhone はタブを開いたまま戻ると読み込み直さないので、戻ったときと1分ごとに確かめる（2026-10-07 sat-designer の指摘）
+function checkNowStale() {
+  if ($('now-btn').classList.contains('is-current') && Date.now() - state.baseTime > 10 * 60000) markNowBtn(false);
+}
+
 function setPlace(p) {
   state.place = p;
   savePlace(p);
@@ -1024,9 +1030,10 @@ function setTimeLimits() {
   $('time-input').max = toInputValue(max);
 }
 // 入力欄の上限・下限を守らないブラウザもあるので、受け取った側でも範囲に収める
+// 日時を変えたら true（欄を空にしただけのときは何も変えないので false）
 function onTimeInput(v) {
   const ms = fromInputValue(v);
-  if (ms === null) return;
+  if (ms === null) return false;
   const { min, max } = timeRange();
   const msg = $('time-msg');
   msg.classList.remove('is-error');
@@ -1036,6 +1043,7 @@ function onTimeInput(v) {
     msg.textContent = `選べるのは、${md(min)}から${md(max)}までです。いちばん近い日時にしました。`;
   }
   setBaseTime(Math.min(max, Math.max(min, ms)));
+  return true;
 }
 
 // 軌道データの古さ。取ってきた時刻ではなく、軌道そのものが作られた時刻（ISS の EPOCH）で測る
@@ -1099,7 +1107,7 @@ async function start() {
     toggleControls(open);
   });
   $('now-btn').addEventListener('click', () => { setTimeLimits(); $('time-msg').textContent = ''; setBaseTime(Date.now()); markNowBtn(true); $('to-list').hidden = false; });
-  $('time-input').addEventListener('change', (e) => { onTimeInput(e.target.value); markNowBtn(false); $('to-list').hidden = false; }); // 日時を変えたあとも一覧へ移れるように
+  $('time-input').addEventListener('change', (e) => { if (onTimeInput(e.target.value)) { markNowBtn(false); $('to-list').hidden = false; } }); // 日時を変えたあとも一覧へ移れるように
   $('night-tabs').addEventListener('click', (e) => {
     const b = e.target.closest('.night-tab');
     if (!b) return;
@@ -1192,6 +1200,9 @@ async function start() {
   }
   setBaseTime(state.baseTime);
   markNowBtn(true); // 開いたときは、いまの日時で予報を出している
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNowStale(); });
+  window.addEventListener('pageshow', checkNowStale);
+  setInterval(checkNowStale, 60000);
 }
 
 start();
