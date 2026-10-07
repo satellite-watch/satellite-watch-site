@@ -1038,7 +1038,7 @@ function showDataAge(data) {
   const t = Date.parse(data.updated);
   const iss = data.sats.find((o) => o.NORAD_CAT_ID === 25544);
   const epoch = iss ? Date.parse(`${iss.EPOCH}Z`) : NaN;
-  el.textContent = `軌道データの取得：${Number.isFinite(t) ? `${md(t)} ${hm(t)}` : '日時不明'}（${state.sats.length}機）`;
+  el.textContent = `軌道データの取得：${Number.isFinite(t) ? `${md(t)} ${hm(t)}` : '日時不明'}（${state.sats.length}機。自動で1日3回取り直しています）`; // 取り直す仕組みは .github/workflows/update-data.yml（2026-10-07 オーナー判断で「1日3回」を添えた。時刻は GitHub の都合でずれるので書かない）
   const days = Number.isFinite(epoch) ? (Date.now() - epoch) / 86400000 : Infinity;
   if (days > 10) {
     warn.textContent = `軌道データが${Number.isFinite(days) ? `${Math.floor(days)}日前` : '古い'}ものです。予報の時刻や方角が大きくずれている可能性があります。`;
