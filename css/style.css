@@ -106,7 +106,7 @@ a { color: var(--link); }
 .to-list { justify-self: stretch; margin-top: 24px; } /* 場所や日時を変えたあと、欄のいちばん下から見える時間（一覧）へひと押しで移る（スマホ・タブレットだけ）。欄と欄の間より広く空けて「締めくくりの操作」と分かるように。横幅いっぱいで、一覧の「地図で通り道を見る」とそろえる */
 .to-list[hidden] { display: none; }
 .controls .current-place { display: none; } /* スマホは要約に場所が出ているので出さない */
-.controls.is-collapsed .card-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+/* 畳んでいるときも「場所と日時」の見出しは出す（何の欄か分かるように。ほかの欄も見出しが出ている。2026-10-07 オーナーの提案） */
 .controls-grid .field { margin-bottom: 0; }
 .controls-grid .field + .field { margin-top: 12px; }
 
@@ -489,7 +489,6 @@ p.legend { display: flex; margin-left: 0; }
   .controls .current-place { display: block; }
   .controls.is-collapsed .controls-grid { display: grid; }
   .controls.is-collapsed #place-notice:not([hidden]) { display: block; } /* PC は畳まないので、案内も出す */
-  .controls.is-collapsed .card-title { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
   .controls-grid .field + .field { margin-top: 0; }
   #map { height: 560px; }
   /* PC は地図の上を「説明（左）｜色分け（右）」の2列にし、凡例はその下に横幅いっぱいで1行に。縦を詰めて地図を上げる */
