@@ -32,7 +32,7 @@
 <header class="site-header">
   <div class="wrap">
     <p class="site-title"><a class="site-title-link" href="index.html">人工衛星みえる予報</a></p>
-    <p class="site-lead">場所と日時を選ぶと、肉眼で見えることがある人工衛星（約160機）の時間と方角がわかります。</p>
+    <p class="site-lead">場所を選ぶと、肉眼で見えることがある人工衛星（約160機）の時間と方角がわかります。</p>
     <nav class="site-nav" aria-label="ページの切り替え">
       <a href="index.html" aria-current="true">予報</a>
       <a href="zukan.html">衛星図鑑</a>
@@ -53,11 +53,11 @@
 </section>
 <div class="wrap layout">
   <section id="controls" class="card controls is-collapsed" aria-labelledby="h-controls">
-    <h2 id="h-controls" class="card-title">場所と日時</h2>
+    <h2 id="h-controls" class="card-title">場所</h2>
     <p id="place-notice" class="notice" hidden>いまは仮に<strong>東京（千代田区）</strong>で表示しています。見る場所を選んでください。</p>
     <div class="controls-summary">
-      <p><strong id="sum-place">—</strong><br><span id="sum-time"></span><span id="sum-msg" class="sum-msg"></span></p>
-      <button type="button" id="controls-toggle" class="btn btn-ghost toggle-btn" aria-expanded="false" aria-controls="controls-body"><span class="sr-only">場所と日時を</span><span id="controls-toggle-label">変える</span><span id="controls-toggle-arrow" aria-hidden="true"> ▾</span></button>
+      <p><strong id="sum-place">—</strong><span id="sum-msg" class="sum-msg"></span></p>
+      <button type="button" id="controls-toggle" class="btn btn-ghost toggle-btn" aria-expanded="false" aria-controls="controls-body"><span class="sr-only">場所を</span><span id="controls-toggle-label">変える</span><span id="controls-toggle-arrow" aria-hidden="true"> ▾</span></button>
     </div>
     <div id="controls-body" class="controls-grid">
       <form id="place-form" class="field" autocomplete="off">
@@ -71,17 +71,7 @@
         <p id="place-msg" class="msg" role="status"></p>
         <p class="current-place">選んでいる場所：<strong id="place-name">—</strong></p>
       </form>
-
-      <div class="field">
-        <label for="time-input" class="label">日時（日本時間）</label>
-        <div class="row">
-          <input id="time-input" type="datetime-local" step="60">
-          <button type="button" id="now-btn" class="btn btn-ghost">今</button>
-        </div>
-        <p id="time-msg" class="msg" role="status"></p>
-        <p class="hint">今夜から7夜分（今日から7日先の朝まで）の予報を出します。先の日付を選ぶと、その分短くなります。先の日付ほど、時刻が数分ずれることがあります。</p>
-      </div>
-      <!-- 場所や日時を変えたあと、見える時間（一覧）へひと押しで移る（スマホだけ）。場所→日時→見える時間の順に上から下へ進めるよう、欄のいちばん下に置く（2026-10-05 オーナーの提案、2026-10-06 一覧を地図より上にしたので行き先を一覧に） -->
+      <!-- 場所を変えたあと、見える時間（一覧）へひと押しで移る（スマホだけ。2026-10-05 オーナーの提案、2026-10-06 行き先を一覧に）。日時の欄は 2026-10-07 オーナー判断でなくした -->
       <button type="button" id="to-list" class="btn btn-ghost to-list" hidden>見える時間の一覧へ ↓</button>
     </div>
   </section>

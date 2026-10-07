@@ -1,11 +1,11 @@
-// 画面の動き：場所・日時の入力、見える回の一覧、空の図、地図
+// 画面の動き：場所の入力、見える回の一覧、空の図、地図（日時の欄は 2026-10-07 オーナー判断でなくした。予報はいつも開いた時刻から）
 import {
   makeSat, makeObserver, snapshot, groundTrack, displayName, originText, dirName, heightWord,
   sunElevation, SUN_LIMIT,
 } from './astro.js';
 import {
   $, esc, DEFAULT_PLACE, scrollBehavior,
-  jstParts, toInputValue, fromInputValue, hm, md, mdShort, nightKey, nightNoon,
+  jstParts, hm, md, mdShort, nightKey, nightNoon,
   loadPlace, savePlace, searchPlace, useGeolocation,
 } from './shared.js';
 import { PHOTOS } from './images.js';
@@ -84,17 +84,11 @@ function markGeoBtn(on) {
   $('geo-btn').innerHTML = on ? '<span class="geo-check" aria-hidden="true">✓</span>現在地<span class="sr-only">（使用中）</span>' : '現在地';
 }
 
-// 「今」の日時で予報を出しているあいだは「今」ボタンにも「✓」と黄色の枠を付ける（2026-10-07 オーナーの提案。「現在地」と同じ見せ方）。
-// 開いたとき（いまの日時で始まる）と「今」を押したときに付け、日時の欄で別の日時を選んだら外す
-function markNowBtn(on) {
-  $('now-btn').classList.toggle('is-current', on);
-  $('now-btn').innerHTML = on ? '<span class="geo-check" aria-hidden="true">✓</span>今<span class="sr-only">（使用中）</span>' : '今';
-}
-
-// 開いたまま時間がたつと、予報の起点（開いた時刻・「今」を押した時刻）は古いままなので、「✓ 今」を外す（10分を目安に）。
-// iPhone はタブを開いたまま戻ると読み込み直さないので、戻ったときと1分ごとに確かめる（2026-10-07 sat-designer の指摘）
-function checkNowStale() {
-  if ($('now-btn').classList.contains('is-current') && Date.now() - state.baseTime > 10 * 60000) markNowBtn(false);
+// 予報はいつも開いた時刻から出す（日時の欄はなくした。2026-10-07 オーナー判断）。
+// 開いたまま時間がたってからこのページに戻ってきたときは、いまの時刻で取り直す（終わった回が残らないように）。
+// iPhone はタブを開いたまま戻ると読み込み直さないため。見ているあいだは取り直さない（選んだ回が消えないように）
+function refreshIfStale() {
+  if (state.data === 'ok' && Date.now() - state.baseTime > 30 * 60000) setBaseTime(Date.now());
 }
 
 function setPlace(p) {
@@ -105,12 +99,12 @@ function setPlace(p) {
   $('place-name').textContent = p.name;
   markGeoBtn(false); // 現在地ボタンから来たときは、呼んだ側で付け直す
   updateSummary();
-  // スマホでも「場所と日時」は開いたままにする（続けて日時も変えられるように。閉じるのは「閉じる」ボタンで。2026-10-05 オーナー判断）
+  // スマホでも「場所」の欄は開いたままにする（閉じるのは「閉じる」ボタンで。2026-10-05 オーナー判断）
   $('place-results').hidden = true;
   // 欄が開いたままなので、切り替わったことを一言で知らせる（#place-msg は読み上げにも伝わる）
   $('place-msg').classList.remove('is-error');
   // ボタンのありかの案内は付けない（一覧がすぐ下にあり、ボタンの名前で分かるため。2026-10-07 オーナー判断）
-  $('place-msg').textContent = `${p.name}の予報に切り替えました。日時も変えられます。`;
+  $('place-msg').textContent = `${p.name}の予報に切り替えました。`;
   $('to-list').hidden = false; // スマホだけに出る（CSS）。見える時間（一覧）へひと押しで移れるように
   state.selected = null;
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、新しい場所でその衛星が見える最初の夜を選び直す
@@ -119,11 +113,10 @@ function setPlace(p) {
   renderView();
 }
 
-// スマホで畳んでいる「場所と日時」の要約と開け閉め
+// スマホで畳んでいる「場所」の欄の要約と開け閉め
 function updateSummary() {
   // 仮の場所（東京）のときは、畳んでいるあいだだけ要約で伝える（開いているときは上の案内の枠で伝えている）
   $('sum-place').textContent = state.firstVisit && $('controls').classList.contains('is-collapsed') ? '仮に東京（千代田区）で表示しています' : state.place.name;
-  $('sum-time').textContent = state.data === 'error' ? '' : `${mdShort(state.baseTime)} ${hm(state.baseTime)}から${nightKeys().length}夜分`;
   $('sum-msg').textContent = state.data === 'error' ? '軌道データを読み込めませんでした' : '';
 }
 function toggleControls(open) {
@@ -1040,37 +1033,9 @@ function setBaseTime(ms) {
   state.selected = null;
   state.night = currentNightKey(ms);
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、その衛星が見える最初の夜を選び直す
-  $('time-input').value = toInputValue(ms);
   updateSummary();
   requestPasses();
   renderView();
-}
-
-function timeRange() {
-  const now = Date.now();
-  // 最後の夜の日付の 23:59 まで選べる（それより後は、予報を出せる夜が残らない）
-  return { min: now - PAST_DAYS * 86400000, max: nightNoon(lastNightKey()) + 12 * 3600000 - 60000 };
-}
-function setTimeLimits() {
-  const { min, max } = timeRange();
-  $('time-input').min = toInputValue(min);
-  $('time-input').max = toInputValue(max);
-}
-// 入力欄の上限・下限を守らないブラウザもあるので、受け取った側でも範囲に収める
-// 日時を変えたら true（欄を空にしただけのときは何も変えないので false）
-function onTimeInput(v) {
-  const ms = fromInputValue(v);
-  if (ms === null) return false;
-  const { min, max } = timeRange();
-  const msg = $('time-msg');
-  msg.classList.remove('is-error');
-  msg.textContent = '';
-  if (ms < min || ms > max) {
-    msg.classList.add('is-error');
-    msg.textContent = `選べるのは、${md(min)}から${md(max)}までです。いちばん近い日時にしました。`;
-  }
-  setBaseTime(Math.min(max, Math.max(min, ms)));
-  return true;
 }
 
 // 軌道データの古さ。取ってきた時刻ではなく、軌道そのものが作られた時刻（ISS の EPOCH）で測る
@@ -1101,12 +1066,10 @@ async function start() {
   $('passes-status').textContent = '軌道データを読み込んでいます…';
   $('place-name').textContent = state.place.name;
   updateSummary();
-  // 「場所と日時」は最初は開いておく（2026-10-07 オーナー判断。絞り込みと同じく、変えられることに気づけるように。前は初めて来た人だけ開いていた）。
+  // 「場所」の欄は最初は開いておく（2026-10-07 オーナー判断。絞り込みと同じく、変えられることに気づけるように。前は初めて来た人だけ開いていた）。
   // ただし宇宙ステーションのページは閉じたままにし、要約で仮の場所だと伝える（検索で来た人に、まず「いつ見えるか」を見せるため。2026-10-05 オーナー判断）
   if (state.firstVisit) $('place-notice').hidden = false;
   if (!FIXED_SAT) toggleControls(true);
-  setTimeLimits();
-  $('time-input').value = toInputValue(state.baseTime);
 
   $('place-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1115,7 +1078,7 @@ async function start() {
   });
   // 現在地を選んだら、前に探した地名を入力欄から消す（残っていると、その地名の予報だと見誤るため）
   $('geo-btn').addEventListener('click', () => useGeolocation((p) => { $('place-input').value = ''; setPlace(p); markGeoBtn(true); }));
-  // 帯の「見る場所を選ぶ」：「場所と日時」を開いてから、そこへ移る（移るのはリンクのふつうの動き）
+  // 帯の「見る場所を選ぶ」：「場所」の欄を開いてから、そこへ移る（移るのはリンクのふつうの動き）
   $('sat-only-place').addEventListener('click', (e) => {
     if (!e.target.closest('a')) return;
     e.preventDefault();
@@ -1137,8 +1100,6 @@ async function start() {
     const open = $('controls').classList.contains('is-collapsed');
     toggleControls(open);
   });
-  $('now-btn').addEventListener('click', () => { setTimeLimits(); $('time-msg').textContent = ''; setBaseTime(Date.now()); markNowBtn(true); $('to-list').hidden = false; });
-  $('time-input').addEventListener('change', (e) => { if (onTimeInput(e.target.value)) { markNowBtn(false); $('to-list').hidden = false; } }); // 日時を変えたあとも一覧へ移れるように
   $('night-tabs').addEventListener('click', (e) => {
     const b = e.target.closest('.night-tab');
     if (!b) return;
@@ -1230,10 +1191,8 @@ async function start() {
     return;
   }
   setBaseTime(state.baseTime);
-  markNowBtn(true); // 開いたときは、いまの日時で予報を出している
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNowStale(); });
-  window.addEventListener('pageshow', checkNowStale);
-  setInterval(checkNowStale, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshIfStale(); });
+  window.addEventListener('pageshow', refreshIfStale);
 }
 
 start();
