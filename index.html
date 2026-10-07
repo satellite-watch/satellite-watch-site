@@ -92,7 +92,7 @@
     <div id="filters-box" class="filters-box is-collapsed">
       <div class="filters-summary">
         <p>絞り込み：<b id="filters-sum">明るい衛星だけ・見やすい回だけ</b></p>
-        <button type="button" id="filters-toggle" class="btn btn-ghost" aria-expanded="false" aria-controls="filters-body">変える</button>
+        <button type="button" id="filters-toggle" class="btn btn-ghost" aria-expanded="false" aria-controls="filters-body"><span class="sr-only">絞り込みを</span><span id="filters-toggle-label">変える</span></button>
       </div>
       <div id="filters-body" class="filters-body">
       <div class="filters" role="group" aria-label="絞り込み">
@@ -108,6 +108,7 @@
     </div>
     <p id="data-warn" class="warn" hidden></p>
     <p id="passes-status" class="msg" role="status">軌道データを読み込んでいます…</p>
+    <button type="button" id="filter-undo" class="btn btn-ghost filter-undo" hidden></button>
     <ol id="pass-list" class="pass-list"></ol>
     <button type="button" id="to-top" class="btn to-top" hidden>↑ 一覧の先頭へ</button>
   </section>

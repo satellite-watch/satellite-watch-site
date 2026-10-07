@@ -400,15 +400,25 @@ function renderPasses() { keepViewWhile(renderPassesInner); }
 function updateFilterSummary() {
   const on = [...document.querySelectorAll('.filters .chip:not([hidden]) input:checked')]
     .map((i) => i.closest('.chip').querySelector('.chip-title').textContent);
-  $('filters-sum').textContent = on.length ? on.join('・') : 'なし（すべての回を表示）';
+  // 名前の途中で改行しないよう1つずつ包む（名前はページの中の決まった文字なので、そのまま入れてよい）。
+  // 1機だけ出しているときは「すべての回」と言うと帯と食い違うので、「低い回も表示」と言う
+  $('filters-sum').innerHTML = on.length ? on.map((t) => `<span class="nowrap">${t}</span>`).join('・')
+    : state.onlySat ? 'なし（低い回も表示）' : 'なし（すべての回を表示）';
 }
 function toggleFilters(open) {
   $('filters-box').classList.toggle('is-collapsed', !open);
   $('filters-toggle').setAttribute('aria-expanded', String(open));
-  $('filters-toggle').textContent = open ? '閉じる' : '変える';
+  $('filters-toggle-label').textContent = open ? '閉じる' : '変える'; // 読み上げ用の「絞り込みを」は残す
+}
+// 0回のときの「『○○』を外して見る」ボタン（絞り込みが畳まれていて外す場所が見えないため。2026-10-07 sat-designer の指摘）
+function showUndo(id, name) {
+  const b = $('filter-undo');
+  b.hidden = !id;
+  if (id) { b.dataset.id = id; b.innerHTML = `<span class="nowrap">「${name}」</span><span class="nowrap">を外して見る</span>`; } // 言葉の途中で改行しない（名前は決まった文字）
 }
 function renderPassesInner() {
   updateFilterSummary();
+  showUndo(null);
   const list = filteredPasses(state.night);
   const status = $('passes-status');
   status.classList.remove('is-error', 'is-notice');
@@ -430,11 +440,14 @@ function renderPassesInner() {
   if (list.length === 0) {
     // どの絞り込みを外せば回が出るかを、1つずつ試して案内する
     const tries = [
-      [state.onlyStations, '宇宙ステーションだけ', { onlyStations: false }],
-      [state.onlyBig, '明るい衛星だけ', { onlyBig: false }],
-      [state.minEl > 10, '見やすい回だけ', { minEl: 10 }],
+      [state.onlyStations, '宇宙ステーションだけ', { onlyStations: false }, 'only-stations'],
+      [state.onlyBig, '明るい衛星だけ', { onlyBig: false }, 'only-big'],
+      [state.minEl > 10, '見やすい回だけ', { minEl: 10 }, 'only-easy'],
     ];
-    const hit = tries.map(([on, name, f]) => on && [name, filteredPasses(state.night, f).length]).find((x) => x && x[1] > 0);
+    const hit = tries.map(([on, name, f, id]) => on && [name, filteredPasses(state.night, f).length, id]).find((x) => x && x[1] > 0);
+    if (hit) showUndo(hit[2], hit[0]);
+    // 1機だけで、7夜とも「見やすい回」がないが低い回はあるとき（帯で「外すと○回あります」と言っている）
+    else if (state.onlySat && state.minEl > 10 && nightKeys().some((k) => filteredPasses(k, { minEl: 10 }).length > 0)) showUndo('only-easy', '見やすい回だけ');
     const only = state.onlySat && state.satById.get(state.onlySat);
     if (only && !hit) {
       // その衛星だけを出しているとき：ほかの夜に回があるかで言い分ける
@@ -1115,6 +1128,11 @@ async function start() {
     $('h-passes').focus({ preventScroll: true });
   });
   $('filters-toggle').addEventListener('click', () => toggleFilters($('filters-box').classList.contains('is-collapsed')));
+  $('filter-undo').addEventListener('click', (e) => {
+    const cb = $(e.currentTarget.dataset.id);
+    if (cb && cb.checked) cb.click(); // チェックを外したときと同じ動き（絞り込みの変更）
+    $('h-passes').focus({ preventScroll: true });
+  });
   $('controls-toggle').addEventListener('click', () => {
     const open = $('controls').classList.contains('is-collapsed');
     toggleControls(open);

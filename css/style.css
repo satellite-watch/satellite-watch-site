@@ -197,10 +197,12 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 /* 1つずつ横幅いっぱいに縦に並べ、名前と説明がそれぞれ1行に収まるようにする */
 .filters { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-bottom: 12px; }
 /* 絞り込みの要約と「変える／閉じる」（スマホ・タブレット）。「場所と日時」の要約と同じ形 */
-.filters-summary { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.filters-summary { display: flex; align-items: center; gap: 12px; margin: 8px 0 12px; } /* 上を少し空けて、日付のタブの続きに見えないように */
 .filters-summary p { flex: 1; min-width: 0; margin: 0; font-size: 15px; line-height: 1.5; color: var(--text-dim); }
-.filters-summary b { color: var(--text); font-weight: 700; }
+.filters-summary b { color: var(--text); font-weight: 700; font-size: 16px; } /* 「場所と日時」の要約とそろえる */
 .filters-box.is-collapsed .filters-body { display: none; }
+.filter-undo { margin-top: 8px; }
+.filter-undo[hidden] { display: none; }
 .chip { position: relative; display: flex; }
 .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 /* 絞り込みは2行：1行目が名前、2行目が短い説明（どの説明がどのボタンのものか迷わないように） */
