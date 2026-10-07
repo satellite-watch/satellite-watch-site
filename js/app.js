@@ -129,7 +129,9 @@ function updateSummary() {
 function toggleControls(open) {
   $('controls').classList.toggle('is-collapsed', !open);
   $('controls-toggle').setAttribute('aria-expanded', String(open));
-  $('controls-toggle').textContent = open ? '閉じる' : '変える';
+  // 「変える ▾」／「閉じる ▴」（2026-10-07 オーナー判断。言葉で何ができるか、矢印で開け閉めだと分かるように。凡例ボタンと同じ矢印）
+  $('controls-toggle-label').textContent = open ? '閉じる' : '変える';
+  $('controls-toggle-arrow').textContent = open ? ' ▴' : ' ▾';
   updateSummary();
 }
 
@@ -408,6 +410,7 @@ function toggleFilters(open) {
   $('filters-box').classList.toggle('is-collapsed', !open);
   $('filters-toggle').setAttribute('aria-expanded', String(open));
   $('filters-toggle-label').textContent = open ? '閉じる' : '変える'; // 読み上げ用の「絞り込みを」は残す
+  $('filters-toggle-arrow').textContent = open ? ' ▴' : ' ▾';
 }
 // 0回のときの「『○○』を外して見る」ボタン（絞り込みが畳まれていて外す場所が見えないため。2026-10-07 sat-designer の指摘）
 function showUndo(id, name) {

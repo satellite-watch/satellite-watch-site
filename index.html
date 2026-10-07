@@ -52,7 +52,7 @@
     <p id="place-notice" class="notice" hidden>いまは仮に<strong>東京（千代田区）</strong>で表示しています。見る場所を選んでください。</p>
     <div class="controls-summary">
       <p><strong id="sum-place">—</strong><br><span id="sum-time"></span><span id="sum-msg" class="sum-msg"></span></p>
-      <button type="button" id="controls-toggle" class="btn btn-ghost" aria-expanded="false" aria-controls="controls-body">変える</button>
+      <button type="button" id="controls-toggle" class="btn btn-ghost toggle-btn" aria-expanded="false" aria-controls="controls-body"><span class="sr-only">場所と日時を</span><span id="controls-toggle-label">変える</span><span id="controls-toggle-arrow" aria-hidden="true"> ▾</span></button>
     </div>
     <div id="controls-body" class="controls-grid">
       <form id="place-form" class="field" autocomplete="off">
@@ -92,7 +92,7 @@
     <div id="filters-box" class="filters-box">
       <div class="filters-summary">
         <p>絞り込み：<b id="filters-sum">明るい衛星だけ・見やすい回だけ</b></p>
-        <button type="button" id="filters-toggle" class="btn btn-ghost" aria-expanded="true" aria-controls="filters-body"><span class="sr-only">絞り込みを</span><span id="filters-toggle-label">閉じる</span></button>
+        <button type="button" id="filters-toggle" class="btn btn-ghost toggle-btn" aria-expanded="true" aria-controls="filters-body"><span class="sr-only">絞り込みを</span><span id="filters-toggle-label">閉じる</span><span id="filters-toggle-arrow" aria-hidden="true"> ▴</span></button>
       </div>
       <div id="filters-body" class="filters-body">
       <div class="filters" role="group" aria-label="絞り込み">

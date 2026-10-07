@@ -202,6 +202,7 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .filters-summary b { color: var(--text); font-weight: 700; font-size: 16px; } /* 「場所と日時」の要約とそろえる */
 .filters-box.is-collapsed .filters-body { display: none; }
 .filter-undo { margin-top: 8px; }
+.toggle-btn { min-width: 6.5em; } /* 「変える ▾」と「閉じる ▴」で幅が変わらないように（要約の折り返しが動かない） */
 .filter-undo[hidden] { display: none; }
 .chip { position: relative; display: flex; }
 .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
