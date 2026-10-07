@@ -109,9 +109,9 @@ function setPlace(p) {
   $('place-results').hidden = true;
   // 欄が開いたままなので、切り替わったことを一言で知らせる（#place-msg は読み上げにも伝わる）
   $('place-msg').classList.remove('is-error');
-  // スマホでは「見える時間を見る ↓」が欄のいちばん下にあり、小さい画面では画面の外になるので、ありかも伝える（PC は出さない）
+  // スマホでは「見える時間の一覧へ ↓」が欄のいちばん下にあり、小さい画面では画面の外になるので、ありかも伝える（PC は出さない）
   const small = !window.matchMedia('(min-width: 960px)').matches;
-  $('place-msg').textContent = `${p.name}の予報に切り替えました。日時も変えられます。${small ? '下の「見える時間を見る ↓」から一覧へ移れます。' : ''}`;
+  $('place-msg').textContent = `${p.name}の予報に切り替えました。日時も変えられます。${small ? '下の「見える時間の一覧へ ↓」から一覧へ移れます。' : ''}`;
   $('to-list').hidden = false; // スマホだけに出る（CSS）。見える時間（一覧）へひと押しで移れるように
   state.selected = null;
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、新しい場所でその衛星が見える最初の夜を選び直す
