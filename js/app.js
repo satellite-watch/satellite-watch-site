@@ -76,11 +76,12 @@ function setLegendOpen(open) {
 }
 
 // 現在地を使っているあいだは「現在地」ボタンに「✓」と黄色の枠を付ける（2026-10-07 オーナー判断。別の場所を選んだら元に戻す）。
-// 押すたびに現在地を取り直すボタンなので、切り替えのボタン（aria-pressed）にはせず、読み上げには「（使用中）」と添える
-function markGeoBtn() {
-  const on = state.place.name.startsWith('現在地（');
+// 付けるのは、このページを開いているあいだにボタンで現在地を取ったときだけ。開き直したときに前回の現在地へ付けると、
+// 出かけた先で「いまいる場所の予報」と見誤るため（2026-10-07 sat-designer の指摘）。
+// 押すたびに現在地を取り直すボタンなので、切り替えのボタン（aria-pressed）にはせず、読み上げには「（使用中）」と添える。✓は読み上げない
+function markGeoBtn(on) {
   $('geo-btn').classList.toggle('is-current', on);
-  $('geo-btn').innerHTML = on ? '現在地<span class="sr-only">（使用中）</span>' : '現在地';
+  $('geo-btn').innerHTML = on ? '<span class="geo-check" aria-hidden="true">✓</span>現在地<span class="sr-only">（使用中）</span>' : '現在地';
 }
 
 function setPlace(p) {
@@ -89,7 +90,7 @@ function setPlace(p) {
   state.firstVisit = false;
   $('place-notice').hidden = true;
   $('place-name').textContent = p.name;
-  markGeoBtn();
+  markGeoBtn(false); // 現在地ボタンから来たときは、呼んだ側で付け直す
   updateSummary();
   // スマホでも「場所と日時」は開いたままにする（続けて日時も変えられるように。閉じるのは「閉じる」ボタンで。2026-10-05 オーナー判断）
   $('place-results').hidden = true;
@@ -1057,7 +1058,6 @@ async function start() {
   }
   $('passes-status').textContent = '軌道データを読み込んでいます…';
   $('place-name').textContent = state.place.name;
-  markGeoBtn();
   updateSummary();
   // 初めて来た人には、仮の場所だと伝えて「場所と日時」を開いておく。
   // ただし宇宙ステーションのページは閉じたままにし、要約で仮の場所だと伝える（検索で来た人に、まず地図と「いつ見えるか」を見せるため。2026-10-05 オーナー判断）
@@ -1074,7 +1074,7 @@ async function start() {
     if (q) searchPlace(q, setPlace);
   });
   // 現在地を選んだら、前に探した地名を入力欄から消す（残っていると、その地名の予報だと見誤るため）
-  $('geo-btn').addEventListener('click', () => useGeolocation((p) => { $('place-input').value = ''; setPlace(p); }));
+  $('geo-btn').addEventListener('click', () => useGeolocation((p) => { $('place-input').value = ''; setPlace(p); markGeoBtn(true); }));
   // 帯の「見る場所を選ぶ」：「場所と日時」を開いてから、そこへ移る（移るのはリンクのふつうの動き）
   $('sat-only-place').addEventListener('click', (e) => {
     if (!e.target.closest('a')) return;
