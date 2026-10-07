@@ -142,8 +142,8 @@ function setPlace(p) {
 // スマホで畳んでいる「場所」の欄の要約と開け閉め
 function updateSummary() {
   // 仮の場所（東京）のときは、畳んでいるあいだだけ要約で伝える（開いているときは上の案内の枠で伝えている）
-  // 仮の場所のときは「東京（千代田区）」を途中で割らない（狭い画面で「千代田／区」と切れないように）
-  if (state.firstVisit && $('controls').classList.contains('is-collapsed')) $('sum-place').innerHTML = '仮に<span class="nowrap">東京（千代田区）</span>で表示しています';
+  // 仮の場所のときは「東京（千代田区）」「で表示しています」を途中で割らない（狭い画面で「千代田／区」「表／示」と切れないように）
+  if (state.firstVisit && $('controls').classList.contains('is-collapsed')) $('sum-place').innerHTML = '仮に<span class="nowrap">東京（千代田区）</span><span class="nowrap">で表示しています</span>';
   else $('sum-place').textContent = state.place.name;
   $('sum-msg').textContent = state.data === 'error' ? '軌道データを読み込めませんでした' : '';
 }
@@ -375,7 +375,8 @@ function renderNightTabs() {
     // 計算しているあいだは回数を出さない（まだ回が無いので「0回」と出てしまうため）
     const n = state.computing ? '…' : `${filteredPasses(k).length}回`;
     const sel = k === state.night;
-    return `<button type="button" class="night-tab" data-k="${k}" aria-pressed="${sel}">${esc(nightLabel(k))}<small>${n}</small></button>`;
+    const empty = !state.computing && !filteredPasses(k).length ? ' data-empty' : ''; // 0回の夜は控えめに（回のある夜を見つけやすく）
+    return `<button type="button" class="night-tab" data-k="${k}" aria-pressed="${sel}"${empty}>${esc(nightLabel(k))}<small>${n}</small></button>`;
   }).join('');
 }
 
@@ -515,7 +516,7 @@ function renderPassesInner() {
     const short = sec < SHORT_SEC ? '<span class="tag tag-short">短い（2分未満）</span>' : '';
     const tags = sat.bright
       ? `<span class="tag tag-station">とても明るい</span>${easy}${short}`
-      : `${sat.big ? '<span class="tag tag-big">明るい</span>' : ''}${easy}${short}<span class="tag">${esc(sat.kind)}</span>`;
+      : `${sat.big ? '<span class="tag tag-big">明るい</span>' : ''}${easy}${short}<span class="tag tag-kind">${esc(sat.kind)}</span>`;
     const pressed = state.selected === p;
     return `<li><button type="button" class="pass" data-i="${i}" aria-pressed="${pressed}">
       <span class="pass-when">${esc(whenWord(p.start.t))}</span>
