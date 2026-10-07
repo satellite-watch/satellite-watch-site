@@ -1,3 +1,4 @@
 node_modules/
 .DS_Store
 img/src/fonts/*.ttf
+.claude/settings.local.json
