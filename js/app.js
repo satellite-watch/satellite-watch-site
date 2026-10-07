@@ -75,12 +75,21 @@ function setLegendOpen(open) {
   $('legend-arrow').textContent = open ? ' ▴' : ' ▾';
 }
 
+// 現在地を使っているあいだは「現在地」ボタンに「✓」と黄色の枠を付ける（2026-10-07 オーナー判断。別の場所を選んだら元に戻す）。
+// 押すたびに現在地を取り直すボタンなので、切り替えのボタン（aria-pressed）にはせず、読み上げには「（使用中）」と添える
+function markGeoBtn() {
+  const on = state.place.name.startsWith('現在地（');
+  $('geo-btn').classList.toggle('is-current', on);
+  $('geo-btn').innerHTML = on ? '現在地<span class="sr-only">（使用中）</span>' : '現在地';
+}
+
 function setPlace(p) {
   state.place = p;
   savePlace(p);
   state.firstVisit = false;
   $('place-notice').hidden = true;
   $('place-name').textContent = p.name;
+  markGeoBtn();
   updateSummary();
   // スマホでも「場所と日時」は開いたままにする（続けて日時も変えられるように。閉じるのは「閉じる」ボタンで。2026-10-05 オーナー判断）
   $('place-results').hidden = true;
@@ -1048,6 +1057,7 @@ async function start() {
   }
   $('passes-status').textContent = '軌道データを読み込んでいます…';
   $('place-name').textContent = state.place.name;
+  markGeoBtn();
   updateSummary();
   // 初めて来た人には、仮の場所だと伝えて「場所と日時」を開いておく。
   // ただし宇宙ステーションのページは閉じたままにし、要約で仮の場所だと伝える（検索で来た人に、まず地図と「いつ見えるか」を見せるため。2026-10-05 オーナー判断）
