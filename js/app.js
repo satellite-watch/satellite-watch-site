@@ -1125,6 +1125,8 @@ async function start() {
     $('controls').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     $('place-input').focus({ preventScroll: true }); // すぐ打ち込めるように
   });
+  // 上の「場所」ボタン：畳んでいたら開いてから移る（移るのはリンクのふつうの動き。打ち込む欄にはフォーカスしない＝スマホでキーボードが急に出ないように）
+  $('jump-controls').addEventListener('click', () => { if ($('controls').classList.contains('is-collapsed')) toggleControls(true); });
   $('to-list').addEventListener('click', () => {
     $('passes').scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     $('h-passes').focus({ preventScroll: true });

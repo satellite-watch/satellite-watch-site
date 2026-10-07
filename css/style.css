@@ -77,11 +77,13 @@ a { color: var(--link); }
   border-bottom: 1px solid var(--line);
 }
 .jump a {
-  flex: 1; text-align: center; text-decoration: none;
+  flex: 1 1 0; padding: 0 8px; white-space: nowrap; /* 同じ幅を目指し、入りきらない「見える時間」だけ広げる（4つ並んでも折れないように。2026-10-07 sat-designer の指摘） */
+  text-align: center; text-decoration: none;
   min-height: 44px; display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--line-strong); border-radius: 999px;
   color: var(--text); font-size: 15px; background: var(--surface);
 }
+.jump a:active { background: var(--surface-2); } /* 押したことが分かるように（まぶしくない程度） */
 
 .layout {
   display: grid; gap: 32px var(--gap); padding-top: 16px; padding-bottom: 24px;
@@ -557,4 +559,9 @@ p.legend { display: flex; margin-left: 0; }
   .row > input { flex-basis: 100%; }
   .row > .btn { flex: 1; }
   .jump a { font-size: 14px; }
+}
+/* 文字を大きくして見ている人（画面の幅がこれより狭くなる）：詰めて並べ、それでも入らなければ「見える／時間」の切れ目で折る（右へはみ出さないように） */
+@media (max-width: 299px) {
+  .jump { gap: 4px; padding: 8px; }
+  .jump a { padding: 0 4px; flex-wrap: wrap; align-content: center; line-height: 1.3; } /* 「見える」「時間」を別の塊にしてあり、その間でだけ折れる */
 }
