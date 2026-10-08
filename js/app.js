@@ -10,8 +10,7 @@ import {
 } from './shared.js';
 import { PHOTOS } from './images.js';
 
-// 予報を出すのは「今夜から7夜分」まで（今日から7日先の朝まで）。先ほど軌道の予報がずれやすいため。
-// 先の日付を選ぶと、その分だけ夜の数が減る（2026-09-29 オーナー判断）
+// 予報を出すのは「今夜から7夜分」まで（今日から7日先の朝まで）。先ほど軌道の予報がずれやすいため（2026-09-29 オーナー判断）
 const NIGHTS = 7;
 const EASY_EL = 40; // 見やすい回＝最も高いところが40°以上（宇宙ステーションは STATION_MIN_EL）
 const ISS_RANGE_KM = 1390; // 高さ約420kmのISSが高さ10°以上に見える範囲の目安
@@ -95,7 +94,7 @@ async function refreshIfStale() {
   }
   showDataAge(state.lastData); // データが古くなっていれば注意を出す
   const sel = state.selected;
-  const restore = { night: state.night, satId: sel?.satId, t: sel?.start.t };
+  const restore = { night: state.night, satId: sel?.satId, t: sel?.start.t, e: sel?.end.t };
   setBaseTime(Date.now());
   state.restore = restore;
   state.refreshing = false;
@@ -133,6 +132,7 @@ function setPlace(p) {
   $('place-msg').textContent = `${p.name}の予報に切り替えました。`;
   $('to-list').hidden = false; // スマホだけに出る（CSS）。見える時間（一覧）へひと押しで移れるように
   state.selected = null;
+  state.restore = null; // 取り直しの途中で場所を変えたら、前の場所で選んでいた夜・回は当てはめない
   if (state.onlySat) state.jumpToSat = true; // 1機に絞っているときは、新しい場所でその衛星が見える最初の夜を選び直す
   updateObserverOnMap(true);
   requestPasses();
@@ -185,10 +185,11 @@ worker.onmessage = (e) => {
     // 戻ってきて取り直したとき：選んでいた夜がまだあれば残し、選んでいた回がまだ終わっていなければ選び直す
     let again = null;
     if (state.restore) {
-      const { night, satId, t } = state.restore;
+      const { night, satId, t, e } = state.restore;
       state.restore = null;
       if (keys.includes(night)) state.night = night;
-      if (satId) again = state.passes.find((p) => p.satId === satId && Math.abs(p.start.t - t) < 60000 && p.end.t > Date.now()) || null;
+      // 同じ衛星で、選んでいた回と時間が重なる回を選び直す（計算し直すと始まりの時刻が少しずれることがあるため、時刻の一致では探さない）
+      if (satId) again = state.passes.find((p) => p.satId === satId && p.start.t <= e && p.end.t >= t && p.end.t > Date.now()) || null;
     }
     renderNightTabs();
     renderPasses();
@@ -213,8 +214,11 @@ function requestPasses() {
   // 最後の夜も明け方まで計算する（途中で切れた夜を作らない）
   const keys = nightKeys();
   const end = nightNoon(keys[keys.length - 1]) + 86400000;
-  const days = (end - state.baseTime) / 86400000;
-  worker.postMessage({ type: 'passes', id: state.reqId, lat: state.place.lat, lon: state.place.lon, start: state.baseTime, days });
+  // 開いた時刻より30分前から計算する（2026-10-08 sat-reviewer の指摘）。開いた時刻から計算すると、その時刻にもう見えている回が
+  // 「開いた時刻に見え始めた」扱いになり、始まりの時刻・現れ方・「短い」の目印が事実と違ってしまうため。終わった回は一覧に出さない（visiblePass の作り）
+  const from = state.baseTime - 30 * 60000;
+  const days = (end - from) / 86400000;
+  worker.postMessage({ type: 'passes', id: state.reqId, lat: state.place.lat, lon: state.place.lon, start: from, days });
 }
 
 // 宇宙ステーションのページで、7夜のうちに一度も見えない（低い回も含めて）とき、
@@ -253,7 +257,7 @@ function aheadText() {
 function lastNightKey() {
   return nightKey(nightNoon(currentNightKey(Date.now())) + (NIGHTS - 1) * 86400000 + 3600000);
 }
-// 予報を出す夜の一覧（選んだ日時から見た「今夜」から、最後の夜まで。多くて7夜分）
+// 予報を出す夜の一覧（開いた時刻から見た「今夜」から、最後の夜まで。多くて7夜分）
 function nightKeys() {
   const first = nightNoon(currentNightKey(state.baseTime));
   const last = nightNoon(lastNightKey());
@@ -333,6 +337,7 @@ function clearOnlySat() {
   state.onlyBig = true; state.minEl = EASY_EL; state.onlyStations = false;
   $('only-big').checked = true; $('only-easy').checked = true; $('only-stations').checked = false;
   setSatOnlyChips(false);
+  if (state.selected && !matchesFilters(state.selected)) state.selected = null; // 絞り込みを変えたときと同じく、条件に合わなくなった回は選ぶのをやめる
   history.replaceState(null, '', location.pathname); // 読み込み直しても戻らないよう、アドレスからも外す
   renderNightTabs();
   renderPasses();
@@ -498,7 +503,7 @@ function renderPassesInner() {
         : `${label}は、見える回がありません。ほかの日を選んでください。`;
     }
   } else {
-    // 選んだ日時が夜の途中なら、そこから後の分だけだと分かるようにする
+    // 開いた時刻が夜の途中なら、そこから後の分だけだと分かるようにする
     const noon = nightNoon(state.night);
     const range = state.baseTime > noon
       ? `${md(state.baseTime)} ${hm(state.baseTime)}以降〜${jstParts(state.baseTime).h < 12 ? '朝' : '翌朝'}`
@@ -1022,7 +1027,7 @@ function renderView() {
       // 1機に絞っていて、7夜とも見える回がないとき（押せる回がないので、一覧へ誘わない）
       cap += `<br><span class="hint">${satNoneText(esc(displayName(state.satById.get(state.onlySat))))}${aheadText()}</span>`;
     } else {
-      cap += '<br><span class="hint">「衛星が見える時間」の一覧から見たい時間を押すと、その衛星の通り道を出します。</span>';
+      cap += '<br><span class="hint">見える時間の一覧から見たい時間を押すと、その衛星の通り道を出します。</span>';
     }
     nextIdx = next ? state.passes.indexOf(next) : -1;
   }
