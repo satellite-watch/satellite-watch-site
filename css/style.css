@@ -279,12 +279,12 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .pass-zukan { display: flex; align-items: center; justify-content: center; width: fit-content; min-height: 44px; margin: 4px auto 0; padding: 0 12px; font-size: 15px; color: var(--link); }
 
 .view-caption { margin: 0 0 8px; font-size: 16px; }
-/* 「次の回の通り道を見る」／「↑ 選んだ回に戻る」（スマホ）：ボタンがなくても場所を取っておく（地図が上下に動かないように） */
+/* 「次の回の通り道を見る」／「↑ 一覧の選んだ回へ」（スマホ）：ボタンがなくても場所を取っておく（地図が上下に動かないように） */
 .view-next { margin: 0 0 12px; min-height: 48px; }
 .view-next.is-back { margin-bottom: 8px; } /* 選んで地図へ移った直後に、地図を少しでも多く見せる */
 .btn-next { font-size: 15px; }
 .btn-next.is-off { visibility: hidden; }
-.btn-next[hidden] { display: none; } /* 「次の回」と「↑ 選んだ回に戻る」は、どちらか一方だけ出す */
+.btn-next[hidden] { display: none; } /* 「次の回」と「↑ 一覧の選んだ回へ」は、どちらか一方だけ出す */
 .view-caption .hint b { color: var(--text); white-space: nowrap; } /* 案内の中の時刻を目立たせ、途中で改行しない */
 .skyview .view-caption { margin-top: -4px; }
 /* 地図はホイールで拡大・縮小しないので、マウスで操作する画面にだけ操作のしかたを添える */
@@ -522,7 +522,7 @@ p.legend { display: flex; margin-left: 0; }
   .mapview .view-caption { grid-area: caption; }
   .mapview .colormode { grid-area: cm; margin-top: 0; justify-self: end; } /* 地図の右端にそろえる */
   .mapview .view-next { grid-area: next; justify-self: end; margin-bottom: 8px; }
-  .mapview .view-next.is-back { display: none; } /* 「↑ 選んだ回に戻る」はスマホだけ（PC は一覧と地図が同じ画面にある） */
+  .mapview .view-next.is-back { display: none; } /* 「↑ 一覧の選んだ回へ」はスマホだけ（PC は一覧と地図が同じ画面にある） */
   .mapview .legends { grid-area: leg; }
   .mapview .legends .legend { margin-top: 0; } /* 凡例を色分けの切り替えに近づける */
   .mapview #map { grid-area: map; }
