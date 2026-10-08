@@ -415,8 +415,9 @@ function updateSatOnlyBar() {
   $('sat-only-none').innerHTML = none ? `${satNoneText()}${aheadText()}`
     : lowOnly ? `この先${keys.length}夜は、低い空を通る回だけです。${aheadText()}` : '';
   $('sat-only-none').hidden = !(none || lowOnly);
-  // 場所をまだ選んでいない人（図鑑や検索から初めて来た人）には、仮に東京の予報だと帯でも伝える（一覧へ移ると上の案内が見えなくなるため）
-  $('sat-only-place').hidden = !state.firstVisit;
+  // 場所をまだ選んでいない人（図鑑から初めて来た人）には、仮に東京の予報だと帯でも伝える（一覧へ移ると上の案内が見えなくなるため）。
+  // 宇宙ステーションのページは一覧へ移らず、すぐ上の「場所」の要約（PC は案内の枠）で伝わっているので出さない（2026-10-08 オーナー判断。同じ案内が2回続かないように）
+  $('sat-only-place').hidden = !state.firstVisit || !!FIXED_SAT;
 }
 
 // スマホでは一覧が地図より上にあるので、一覧が画面より上に流れているときに作り直すと、長さが変わったぶん地図が上下に飛ぶ。
