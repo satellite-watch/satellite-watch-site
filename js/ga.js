@@ -1,7 +1,7 @@
 // 見た人を数える仕組み（Google アナリティクス）。2026-10-04 オーナー判断。扱いは privacy.html に書いたとおりにする
 // 測定IDはここだけに書く。手元（localhost など）で開いたときは数えない（実際に見た人の数を正確にするため）
 (function () {
-  var ID = 'G-XXXXXXXXXX';
+  var ID = 'G-G00TVDH5DD';
   // 測定IDがまだ仮のままなら何もしない（どこにも記録されない通信を送らないため）
   if (!/^G-[A-Z0-9]+$/.test(ID) || ID.indexOf('XXXX') !== -1) return;
   if (location.hostname !== 'satellite-watch.jp') return;
