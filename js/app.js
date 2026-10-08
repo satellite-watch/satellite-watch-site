@@ -1030,7 +1030,12 @@ function renderView() {
   // 回を選んでいないあいだはボタンの場所を常に取っておき、出たり消えたりしても地図が上下に動かないようにする
   // ただし、この先の夜に条件に合う回が1つもないときは場所も取らない（空白が「読み込み損ね」に見えるため）
   const anyPass = state.computing || nightKeys().some((k) => filteredPasses(k).length > 0);
-  $('view-next').hidden = !(state.data === 'ok' && !state.selected && anyPass);
+  // 回を選んでいるあいだは、同じ場所に「↑ 選んだ回に戻る」を出す（スマホだけ。2026-10-08 オーナー判断。地図から一覧の先頭へ戻ると、選んだ札を探し直すことになるため）。
+  // PC は一覧と地図が同じ画面にあるので出さない（CSS の .is-back）。場所を取り続けるので、選んでも地図は上下に動かない
+  $('view-next').hidden = !(state.data === 'ok' && (state.selected || anyPass));
+  $('view-next').classList.toggle('is-back', !!state.selected);
+  $('next-btn').hidden = !!state.selected;
+  $('back-btn').hidden = !state.selected;
   $('next-btn').classList.toggle('is-off', nextIdx < 0);
   $('next-btn').dataset.next = String(nextIdx);
   $('view-caption').innerHTML = cap;
@@ -1169,6 +1174,19 @@ async function start() {
     showPass(p);
     // 次の操作（▶︎で動きを見る）に操作位置を移す。一覧の回に移ると、もう一度押したとき選択が外れるため
     $('play-btn').focus({ preventScroll: true });
+  });
+  $('back-btn').addEventListener('click', () => {
+    // 選んだあとに別の夜のタブを押していたら、選んだ回の夜に戻して一覧を作り直す（2026-10-08 sat-designer の指摘。札が見つからない行き止まりにしない）
+    if (state.selected && nightKey(state.selected.start.t) !== state.night) {
+      state.night = nightKey(state.selected.start.t);
+      renderNightTabs();
+      renderPasses();
+    }
+    // 選んだ札を、上の移動バーに隠れない位置（上から72px）へ送る。見つからなければ一覧の先頭へ
+    const b = document.querySelector('#pass-list .pass[aria-pressed="true"]');
+    if (!b) { $('passes').scrollIntoView({ behavior: scrollBehavior(), block: 'start' }); $('h-passes').focus({ preventScroll: true }); return; }
+    window.scrollTo({ top: b.getBoundingClientRect().top + window.scrollY - 72, behavior: scrollBehavior() });
+    b.focus({ preventScroll: true });
   });
   bindToTop();
   $('pass-list').addEventListener('click', (e) => {

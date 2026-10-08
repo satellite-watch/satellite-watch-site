@@ -74,7 +74,7 @@
         <p class="current-place">選んでいる場所：<strong id="place-name">—</strong></p>
       </form>
       <!-- 場所を変えたあと、見える時間（一覧）へひと押しで移る（スマホだけ。2026-10-05 オーナーの提案、2026-10-06 行き先を一覧に）。日時の欄は 2026-10-07 オーナー判断でなくした -->
-      <button type="button" id="to-list" class="btn btn-ghost to-list" hidden>見える時間の一覧へ ↓</button>
+      <button type="button" id="to-list" class="btn btn-ghost to-list" hidden>見える時間の一覧へ<span aria-hidden="true"> ↓</span></button>
     </div>
   </section>
 
@@ -113,7 +113,7 @@
   <section id="view" class="card mapview" aria-labelledby="h-view">
     <h2 id="h-view" class="card-title" tabindex="-1">衛星の位置の地図</h2>
     <p id="view-caption" class="view-caption">軌道データを読み込んでいます…</p>
-    <div id="view-next" class="view-next" hidden><button type="button" id="next-btn" class="btn btn-ghost btn-next is-off">次の回の通り道を見る</button></div>
+    <div id="view-next" class="view-next" hidden><button type="button" id="next-btn" class="btn btn-ghost btn-next is-off">次の回の通り道を見る</button><button type="button" id="back-btn" class="btn btn-ghost btn-next" hidden><span aria-hidden="true">↑ </span>選んだ回に戻る</button></div>
     <div class="colormode">
       <span id="colormode-label">色分け：</span>
       <div class="seg" role="group" aria-labelledby="colormode-label">
