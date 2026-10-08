@@ -148,6 +148,10 @@
       <button type="button" id="play-btn" class="btn btn-ghost" aria-label="時間を進める">▶︎</button>
       <input id="time-slider" type="range" min="-180" max="180" step="1" value="0" aria-label="時刻を前後に動かす">
       <span id="slider-time" class="slider-time"></span>
+      <!-- 地図と空の図をいまの時刻に戻す（2026-10-08 オーナー判断。日時の欄と一緒になくなった「今」ボタンの代わり）。
+           時刻の表示の後ろに置く（PC で「今 地図の時刻 23:40」と続けて読まれないように。スマホは時刻が上の行に上がる） -->
+      <button type="button" id="now-btn" class="btn btn-ghost" aria-label="今の時刻にする（地図と空の図）">今</button>
+      <span id="now-msg" class="sr-only" role="status"></span>
     </div>
   </section>
 

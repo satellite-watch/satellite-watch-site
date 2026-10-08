@@ -292,6 +292,7 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 @media (hover: hover) and (pointer: fine) { .map-zoom-hint { display: block; } }
 .timebar { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; }
 .timebar .btn { min-width: 48px; padding: 8px; }
+#now-btn { margin-left: 6px; } /* 時刻の表示と離して、ボタンだと分かるように */
 #time-slider { flex: 1; min-width: 0; height: 44px; accent-color: var(--accent); }
 .slider-time { font-variant-numeric: tabular-nums; font-size: 15px; min-width: 7.5em; text-align: right; }
 

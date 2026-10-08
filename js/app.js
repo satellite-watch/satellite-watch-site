@@ -994,6 +994,7 @@ function renderView() {
   // 軌道データがないあいだは、再生とつまみを押せないようにする
   $('play-btn').disabled = state.data !== 'ok';
   $('time-slider').disabled = state.data !== 'ok';
+  $('now-btn').disabled = state.data !== 'ok';
   const obs = makeObserver(state.place.lat, state.place.lon);
   const snap = snapshot(state.sats, obs, new Date(t));
   const when = `${md(t)} ${hm(t)}`;
@@ -1209,6 +1210,20 @@ async function start() {
     renderView();
   });
   $('play-btn').addEventListener('click', togglePlay);
+  // 「今」：地図と空の図をいまの時刻にする。選んでいた回は外す（選んでいるあいだは、つまみがその回の前後しか動かないため）
+  $('now-btn').addEventListener('click', () => {
+    stopPlay();
+    const had = !!state.selected;
+    state.selected = null;
+    state.anchor = Date.now();
+    state.offset = 0;
+    if (had) keepViewWhile(renderPasses);
+    renderView();
+    // 外したことは画面では地図の線が消えるだけなので、読み上げで伝える
+    $('now-msg').textContent = had ? `選んでいた回を外して、いまの時刻（${hm(state.anchor)}）にしました` : '';
+    // 開いたまま30分以上たっていれば、一覧もいまの時刻で取り直す（地図だけ今になって一覧が古いままにならないように。選んでいた回は外したので選び直さない）
+    refreshIfStale();
+  });
   $('legend-toggle').addEventListener('click', () => setLegendOpen($('legends').classList.contains('is-collapsed')));
   document.querySelector('.seg').addEventListener('click', (e) => {
     const b = e.target.closest('button');
