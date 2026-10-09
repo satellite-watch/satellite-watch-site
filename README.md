@@ -16,6 +16,7 @@
 | `404.html` | 存在しないアドレスを開いたときのページ（GitHub Pages が使う）。読み込むものは「/」から始まるアドレスで書く |
 | `sitemap.xml` / `robots.txt` | 検索サイト向けのページの一覧と案内。**ページを足したら `sitemap.xml` にも足す**。各ページの `<link rel="canonical">`（正本のアドレス）も satellite-watch.jp で書いている |
 | `zukan.html` / `js/zukan.js` | 衛星図鑑のページ（画像のある衛星を、名前・国・打ち上げ年・目的といっしょに並べる） |
+| `yomimono.html` / `yomimono-*.html` | 読み物（一覧と、人工衛星の見つけ方・ロケットの一部・ISS の見方の3本）。出典は各ページの下。読み物を足したら一覧・sitemap.xml にも足す |
 | `js/images.js` | 衛星の画像の表（実物の画像があるものだけ）。足すときは `img/sats/SOURCES.md` にも1行足す |
 | `img/sats/` | 衛星の写真・想像図（NASA）。出典と利用条件は `SOURCES.md` |
 | `js/worker.js` | 見える回の計算を裏で行う係（画面を固めないため） |

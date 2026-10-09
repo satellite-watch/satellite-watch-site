@@ -22,7 +22,7 @@ const STATIONS = [
       <p>条件がよければ木星くらい（−2等級）の明るさになり、真上近くを通るときは金星や木星より明るく見えることもあります。点滅せず、明るい光のまま空をすーっと動いていきます。見えるのは主に日の入り後と日の出前の2時間ほどで、見える回のない日が何日も続くこともあります。空の途中で急に現れたり消えたりするのは、地球の影から出入りするためです。</p>
 
       <h3>ほかの予報も見たいときは</h3>
-      <p>ISS の予報は、JAXA の支援のもとで運営されている<a href="https://lookup.kibo.space/" target="_blank" rel="noopener">「#きぼうを見よう」</a>でも調べられます。このサイトでは、ISS のほかに<a href="tiangong.html">天宮（中国の宇宙ステーション）が見える時間</a>や、<a href="index.html">ほかの人工衛星もまとめた予報</a>も見られます。見え方の疑問は<a href="index.html#faq">よくある質問</a>に、見つけるコツは読み物<a href="yomimono-iss.html">「ISS を肉眼で見るには」</a>にまとめています。</p>
+      <p>ISS の予報は、JAXA の支援のもとで運営されている<a href="https://lookup.kibo.space/" target="_blank" rel="noopener">「#きぼうを見よう」</a>でも調べられます。このサイトでは、ISS のほかに<a href="tiangong.html">天宮（中国の宇宙ステーション）が見える時間</a>や、<a href="index.html">ほかの人工衛星もまとめた予報</a>も見られます。見え方の疑問は<a href="index.html#faq">よくある質問</a>に、見つけるコツは読み物<a href="yomimono-iss.html">「ISS（国際宇宙ステーション）を肉眼で見るには」</a>にまとめています。</p>
 
       <p class="about-src">出典：JAXA<a href="https://humans-in-space.jaxa.jp/iss/about/" target="_blank" rel="noopener">「国際宇宙ステーション（ISS）とは」</a>・<a href="https://iss.jaxa.jp/iss/map/guide.html" target="_blank" rel="noopener">「「きぼう」を見よう」</a>・<a href="https://fanfun.jaxa.jp/faq/detail/78.html" target="_blank" rel="noopener">よくある質問「地上から肉眼で「きぼう」/ISSを見ることはできますか？」</a>、<a href="https://lookup.kibo.space/howto/" target="_blank" rel="noopener">#きぼうを見よう</a></p>
     </div>`,
@@ -45,7 +45,7 @@ const STATIONS = [
       <p>ISS と同じく、太陽の光を反射して、空をすーっと動く光として見えます。見えるのは主に日の入り後と日の出前で、見える回のない日が何日も続くこともあります。空の途中で急に現れたり消えたりするのは、地球の影から出入りするためです。</p>
 
       <h3>ほかの予報も見たいときは</h3>
-      <p>このサイトでは、<a href="iss.html">ISS（国際宇宙ステーション）が見える時間</a>や、<a href="index.html">ほかの人工衛星もまとめた予報</a>も見られます。見え方の疑問は<a href="index.html#faq">よくある質問</a>にまとめています。</p>
+      <p>このサイトでは、<a href="iss.html">ISS（国際宇宙ステーション）が見える時間</a>や、<a href="index.html">ほかの人工衛星もまとめた予報</a>も見られます。見え方の疑問は<a href="index.html#faq">よくある質問</a>に、飛行機や流れ星との見分け方は読み物<a href="yomimono-mitsukekata.html">「人工衛星の見つけ方」</a>にまとめています。</p>
 
       <p class="about-src">出典：<a href="https://www.astroarts.co.jp/article/hl/a/12747_css" target="_blank" rel="noopener">アストロアーツ「中国宇宙ステーションが完成」</a>、軌道データ＝<a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a></p>
     </div>`,

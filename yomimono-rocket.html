@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>一覧に「ロケットの一部」が多いのはなぜ？ ― SL-16 R/B などの読み方 | 人工衛星みえる予報</title>
-<meta name="description" content="肉眼で見える人工衛星の予報には「SL-16 R/B」などのロケットの一部がたくさん出てきます。その正体と、何十年も回り続けている理由、名前の読み方をまとめました。">
+<meta name="description" content="肉眼で見える人工衛星の予報には「SL-16 R/B」などのロケットの一部がたくさん出てきます。その正体と、何十年も回り続けているもの、名前の読み方をまとめました。">
 <link rel="canonical" href="https://satellite-watch.jp/yomimono-rocket.html">
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="人工衛星みえる予報">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:title" content="一覧に「ロケットの一部」が多いのはなぜ？ | 人工衛星みえる予報">
-<meta property="og:description" content="予報に出てくる「SL-16 R/B」などのロケットの一部。その正体と、何十年も回り続けている理由、名前の読み方をまとめました。">
+<meta property="og:description" content="予報に出てくる「SL-16 R/B」などのロケットの一部。その正体と、何十年も回り続けているもの、名前の読み方をまとめました。">
 <meta property="og:url" content="https://satellite-watch.jp/yomimono-rocket.html">
 <meta property="og:image" content="https://satellite-watch.jp/img/ogp.png">
 <meta property="og:image:width" content="1200">
@@ -38,52 +38,55 @@
 </header>
 
 <!-- 読み物（2026-10-09 オーナー判断）。推測で書かない：書いてあることは下の出典で確かめたもの。
-     数・高さ・打ち上げ年は 2026-10-09 の data/sats.json（CelesTrak の visual グループ＋衛星登録台帳）から数えた。データが大きく変わったら数え直す -->
+     数・高さ・打ち上げ年・国は 2026-10-09 の data/sats.json（CelesTrak の visual グループ＋衛星登録台帳）から、サイトの分け方（js/astro.js：名前に R/B があるか番号 694）で数えた。
+     データの更新で古くならないよう丸めた言い方にしている（sat-reviewer の指摘）。大きく変わったら数え直す -->
 <main class="wrap zukan-main">
   <article aria-labelledby="h-article">
-    <p class="article-kind"><a href="yomimono.html">読み物</a></p>
-    <h1 id="h-article" class="card-title">一覧に「ロケットの一部」が多いのはなぜ？</h1>
-    <p class="article-date">2026年10月9日</p>
+    <p class="article-kind"><a href="yomimono.html"><span aria-hidden="true">‹ </span>読み物の一覧</a></p>
+    <h1 id="h-article" class="card-title article-title">一覧に<span class="nowrap">「ロケットの一部」</span>が<span class="nowrap">多いのはなぜ？</span></h1>
+    <p class="article-date">公開：2026年10月9日</p>
     <div class="faq-list">
-      <p>このサイトの「衛星が見える時間」の一覧には、「SL-16 R/B」「H-IIAロケットの一部」のような名前がたくさん出てきます。このサイトで予報している156機のうち、92機、つまり6割ほどがロケットの一部です（2026年10月時点）。人工衛星を見ようとしたのに、なぜロケットなのでしょうか。</p>
+      <p>このサイトの「衛星が見える時間」の一覧には、<span class="nowrap">「SL-16 R/B」</span>や<span class="nowrap">「H-IIAロケットの一部」</span>のような名前がたくさん出てきます。このサイトで予報している約160機のうち、約90機、つまり6割ほどがロケットの一部です。人工衛星を見ようとしたのに、なぜロケットなのでしょうか。</p>
 
       <h2>ロケットの一部とは</h2>
-      <p>人工衛星を打ち上げたロケットの、いちばん上の段です。衛星を軌道まで運んだあと、衛星と一緒に軌道に残り、それからずっと地球を回り続けています。役目を終えた人工衛星や、壊れてできた破片と同じく、「スペースデブリ（宇宙ごみ）」のひとつです。</p>
-      <p>名前の「R/B」は、英語の Rocket Body（ロケットの胴体）の略です。</p>
+      <p>人工衛星を打ち上げたロケットの、上の段（上段）です。衛星を軌道まで運んだあと、衛星と一緒に軌道に残ったもので、その多くは今も地球を回っています。役目を終えた人工衛星や、壊れてできた破片と同じく、「スペースデブリ（宇宙ごみ）」のひとつです。</p>
+      <p>このサイトでは、名前の最後に<span class="nowrap">「R/B」</span>が付いているものを「ロケットの一部」として表示しています。</p>
 
-      <h2>なぜ見えやすいのか</h2>
-      <p>人工衛星もロケットの一部も、自分では光らず、太陽の光を反射して光っています。大きなものほど多くの光を反射するので、明るく見えやすくなります（明るさは形や向きでも変わります）。</p>
-      <p>ロケットの上の段は、小さな人工衛星よりずっと大きいものが少なくありません。このサイトで「明るい衛星」としている、レーダーで測った大きさが10㎡以上のもの32機のうち、22機がロケットの一部です。たとえば「SL-16 R/B」は20機あり、大きさは8〜13㎡ほどです。</p>
-      <p>回転しながら回っているものは、明るさが数秒おきに強くなったり弱くなったりして見えることがあります。</p>
+      <h2>なぜ一覧に多いのか</h2>
+      <p>人工衛星もロケットの一部も、自分では光らず、太陽の光を反射して光っています。このサイトでは、レーダーで測った大きさを明るさの目安にしていて（明るさは形や向き、距離でも変わります）、最初の絞り込み「明るい衛星だけ」（約40機）は、おもにこの大きさが10㎡以上のものです。その約40機のうち、20機あまりがロケットの一部です。</p>
+      <p>たとえば<span class="nowrap">「SL-16 R/B」</span>は20機ほどあり、レーダーで測った大きさ（目安）は8〜13㎡ほどです。</p>
+      <p>回転しながら回っているものは、明るさが一定の間隔で強くなったり弱くなったりして見えることがあります。</p>
 
-      <h2>なぜ何十年も回り続けるのか</h2>
-      <p>低い軌道では、わずかに残る空気の抵抗で少しずつ高さが下がり、最後は大気圏に落ちてきます。高いところを回るものほど、その抵抗が小さく、長く回り続けます。</p>
-      <p>このサイトで予報しているロケットの一部は、多くが地上から550〜850kmほどの高さを回っています。92機のうち69機は2000年より前に打ち上げられたもので、いちばん古いものは1964年の打ち上げです。60年以上、宇宙に残っていることになります。</p>
+      <h2>何十年も回り続けているものも</h2>
+      <p>低い軌道では、わずかに残る空気の抵抗で少しずつ高さが下がり、最後は大気圏に落ちてきます。このサイトで予報しているロケットの一部は、多くが地上から550〜850kmほどの高さを回っていて、7割あまりが2000年より前に打ち上げられたものです。いちばん古いものは1963年の打ち上げで、60年以上たった今も回っています。</p>
       <p>こうした大きなデブリは、ほかの人工衛星にぶつかる心配があり、取り除く方法の研究も進められています。</p>
 
       <h2>名前の読み方</h2>
-      <p>「SL-」で始まる名前は、アメリカの国防総省が、旧ソ連・ロシアのロケットに付けた呼び名です。このサイトでよく出てくるものは次のとおりです。</p>
+      <p><span class="nowrap">「SL-」</span>で始まる名前は、アメリカの国防総省が、旧ソ連・ロシアのロケットに付けた呼び名です。このサイトでよく出てくるものは次のとおりです（どれも10〜20機ほどあります）。</p>
       <ul>
-        <li><b>SL-16</b>：ゼニット（20機）</li>
-        <li><b>SL-14</b>：ツィクロン3（17機）</li>
-        <li><b>SL-8</b>：コスモス（12機）</li>
-        <li><b>SL-3</b>：ボストーク（11機）</li>
+        <li><b>SL-16</b>：ゼニット</li>
+        <li><b>SL-14</b>：ツィクロン3</li>
+        <li><b>SL-8</b>：コスモス</li>
+        <li><b>SL-3</b>：ボストーク</li>
       </ul>
-      <p>ほかに、「CZ-」は中国の長征ロケット、「H-2A」は日本の H-IIA ロケット（このサイトでは「H-IIAロケットの一部」と表示）、「ARIANE」はヨーロッパのアリアンロケット、「DELTA」「ATLAS」「TITAN」はアメリカのロケットです。</p>
-      <p>打ち上げた国で数えると、旧ソ連・ロシアが63機、中国が12機、アメリカとフランス（アリアンロケット）が6機ずつ、日本が4機、インドが1機です。旧ソ連・ロシアのものは、ほとんどが1990年代までに打ち上げられたものです。</p>
+      <p>ほかの名前は、衛星の登録台帳では次の国の登録になっています。<span class="nowrap">「CZ-」</span>は中国、<span class="nowrap">「H-2A」</span>は日本（このサイトでは「H-IIAロケットの一部」と表示）、<span class="nowrap">「ARIANE」</span>はフランス、<span class="nowrap">「DELTA」</span><span class="nowrap">「ATLAS」</span><span class="nowrap">「TITAN」</span>はアメリカです。</p>
+      <p>打ち上げた国で見ると、旧ソ連・ロシアのものが7割ほどを占め、ほかに中国、アメリカ、フランス、日本、インドのものがあります。旧ソ連・ロシアのものは、ほとんどが1990年代までに打ち上げられたものです。</p>
 
       <h2>見えたら</h2>
       <p>ロケットの一部は、人工衛星そのものではありませんが、何十年も前の打ち上げの名残です。一覧の札には、打ち上げた国と年を添えています。夜空を横切る光を見ながら、それがいつ、どこから打ち上げられたものかを思い浮かべるのも楽しみ方のひとつです。</p>
+      <p class="article-note">この記事の数は2026年10月時点のものです。予報している人工衛星は、軌道データの更新に合わせて少しずつ入れ替わります。</p>
 
-      <p class="about-src">出典：JAXA よくある質問<a href="https://fanfun.jaxa.jp/faq/detail/15954.html" target="_blank" rel="noopener">「宇宙ごみ（スペースデブリ）って何？」</a>・<a href="https://www.kenkai.jaxa.jp/research/pastres/deb-faq.html" target="_blank" rel="noopener">「スペースデブリに関してよくある質問」</a>、JAXA<a href="https://www.kenkai.jaxa.jp/crd2/about/" target="_blank" rel="noopener">「商業デブリ除去実証（CRD2）」</a>、#きぼうを見よう<a href="https://lookup.kibo.space/howto/" target="_blank" rel="noopener">「きぼうはなぜ見える」</a>（太陽の光の反射）、SL- の呼び名＝Andreas Parsch<a href="http://www.designation-systems.net/non-us/wdrc.html" target="_blank" rel="noopener">「Western Designations of Soviet/Russian and Chinese Military Aircraft and Missiles」</a>、機数・大きさ（レーダーで測った大きさ）・高さ・国・打ち上げ年＝<a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a> の軌道データと衛星登録台帳（もとは米国宇宙軍が <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> で公開しているデータ。2026年10月時点）、回転するロケットの明るさの変化＝<a href="https://www.satobs.org/tumble/tumbleintro.html" target="_blank" rel="noopener">Visual Satellite Observer's Home Page「Tumbling Satellites」</a></p>
+      <p class="about-src">出典：JAXA よくある質問<a href="https://fanfun.jaxa.jp/faq/detail/15954.html" target="_blank" rel="noopener">「宇宙ごみ（スペースデブリ）って何？」</a>・<a href="https://www.kenkai.jaxa.jp/research/pastres/deb-faq.html" target="_blank" rel="noopener">「スペースデブリに関してよくある質問」</a>（ロケットの上段、空気の抵抗で高さが下がること）、JAXA<a href="https://www.kenkai.jaxa.jp/crd2/about/" target="_blank" rel="noopener">「商業デブリ除去実証（CRD2）」</a>、#きぼうを見よう<a href="https://lookup.kibo.space/howto/" target="_blank" rel="noopener">「きぼうはなぜ見える」</a>（太陽の光の反射）、SL- の呼び名＝Andreas Parsch<a href="https://www.designation-systems.net/non-us/wdrc.html" target="_blank" rel="noopener">「Western Designations of Soviet/Russian and Chinese Military Aircraft and Missiles」</a>（Space Launchers の表）、機数・レーダーで測った大きさ・高さ・登録の国・打ち上げ年＝<a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a> の軌道データと衛星登録台帳（もとは米国宇宙軍が <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> で公開しているデータ。2026年10月時点）、回転するものの明るさの変化＝<a href="https://www.satobs.org/tumble/tumbleintro.html" target="_blank" rel="noopener">Visual Satellite Observer's Home Page「Tumbling Satellites」</a></p>
     </div>
   </article>
 </main>
 
 <footer class="site-footer">
   <div class="wrap">
-    <p class="page-jump"><a class="btn" href="index.html">今夜見える人工衛星を調べる<span aria-hidden="true">→</span></a></p>
-    <p class="page-jump"><a class="btn btn-ghost" href="yomimono.html">読み物の一覧へ<span aria-hidden="true">→</span></a></p>
+    <div class="page-jump page-jump-stack">
+      <a class="btn" href="index.html">今夜見える人工衛星を調べる<span aria-hidden="true">→</span></a>
+      <a class="btn btn-ghost" href="yomimono.html">読み物の一覧へ<span aria-hidden="true">→</span></a>
+    </div>
     <p class="contact"><a href="https://forms.gle/ULYB9ghzvGdWSWb76" target="_blank" rel="noopener">お問い合わせ<span aria-hidden="true">↗︎</span><span class="sr-only">（別のタブで開きます）</span></a><span class="contact-note">広告掲載のご相談、予報や説明の誤りのご連絡など。別のタブで Google フォームが開きます。</span></p>
     <p class="policy-link"><a href="privacy.html">プライバシーポリシー</a></p>
   </div>

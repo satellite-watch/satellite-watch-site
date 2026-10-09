@@ -56,6 +56,7 @@ a { color: var(--link); }
    いまいるページは黄色の下線と太字で示す */
 .site-nav { display: flex; gap: 8px; margin-top: 12px; border-bottom: 1px solid var(--line); }
 .site-nav a {
+  white-space: nowrap; /* タブが3つになったので、文字を大きくした画面でもタブの中で割れないように（2026-10-09 sat-designer の指摘） */
   min-height: 44px; padding: 0 14px; display: flex; align-items: center; text-decoration: none;
   color: var(--text-dim); font-size: 16px; border-bottom: 3px solid transparent; margin-bottom: -1px; /* 本文と同じ16px */
 }
@@ -65,6 +66,7 @@ a { color: var(--link); }
   .site-header { padding-top: 12px; }
   .site-nav { margin-top: 4px; }
 }
+@media (max-width: 359px) { .site-nav { gap: 4px; } .site-nav a { padding: 0 10px; } } /* 文字を大きくした画面でもタブ3つを1行に
 /* スマホ：一覧と地図を早く見せるため、説明文は出さない */
 @media (max-width: 599px) { .site-lead { display: none; } }
 
@@ -409,7 +411,7 @@ p.legend { display: flex; margin-left: 0; }
 .faq-list :is(h2, h3):not(:first-child) { margin-top: 20px; }
 .policy .zukan-facts { gap: 10px 12px; font-size: 16px; line-height: 1.8; } /* プライバシーポリシー：長い文章なので本文と同じ16px。項目どうしのすき間を行間より広くして、次の項目を続きと見誤らないように */
 .faq-list p, .faq-list ul { margin: 8px 0 0; font-size: 16px; line-height: 1.8; } /* 長い文章なので本文と同じ16px */
-.faq-list p + p, .faq-list p + ul { margin-top: 12px; }
+.faq-list p + p, .faq-list p + :is(ul, ol) { margin-top: 12px; }
 .faq-list ul { padding-left: 1.5em; }
 /* 予報のページのよくある質問だけ、質問を押すと答えが開く形（2026-10-05 オーナー判断）。宇宙ステーションのページの「〜について」は開いたままの説明文なので #faq の中だけに効かせる */
 #faq .faq-list { border-bottom: 1px solid var(--line); }
@@ -430,7 +432,7 @@ p.legend { display: flex; margin-left: 0; }
 @media (max-width: 599px) { .station-title { font-size: 24px; } .station-title .nowrap { font-feature-settings: "palt"; } } /* スマホは「ISS（国際宇宙ステーション）／が見える時間」の2行に収める（かっこを半分の幅に詰める） */
 @media (max-width: 359px) { .station-title { font-size: 22px; } .station-title .nowrap { font-feature-settings: "palt"; } .card-title { font-size: 20px; } } /* 欄の見出しはページの題名（22px）より小さく */ /* 320px でも1行に収める（かっこを半分の幅に詰める） */
 .station-lead { margin: 6px 0 0; max-width: 40em; font-size: 16px; line-height: 1.7; color: var(--text-dim); }
-.faq-list .about-src { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.7; color: var(--text-dim); }
+.faq-list .about-src { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.9; color: var(--text-dim); }
 @media (min-width: 600px) { .station-title { font-size: 28px; } } /* PC はサイト名（26px）より大きくし、このページの題名だと分かるように */
 /* スマホ：一覧と地図を早く見せるため、説明文は出さない（サイトの説明 .site-lead と同じ扱い） */
 @media (max-width: 599px) {
@@ -477,23 +479,34 @@ p.legend { display: flex; margin-left: 0; }
 .zukan-cap { margin: 10px 0 12px; font-size: 13px; line-height: 1.5; color: var(--text-dim); }
 
 /* ---------- 読み物（2026-10-09 オーナー判断） ---------- */
-/* 一覧：札全体を押せるリンクにする（図鑑の札と同じ地の色・枠・角丸） */
+/* 一覧：札全体を押せるリンクにする。押せると分かるよう、題名は下線つきのリンクの色、枠は枠線のボタンと同じ濃さ（2026-10-09 sat-designer の指摘） */
 .yomimono-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-width: 40em; }
-.yomimono-list a { display: block; padding: 14px 16px; min-height: 44px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); text-decoration: none; color: var(--text); }
-.yomimono-list a:hover { border-color: var(--line-strong); }
-.yomimono-title { display: block; font-size: 18px; font-weight: 700; line-height: 1.5; color: var(--link); }
+.yomimono-list a { display: block; padding: 14px 16px; min-height: 44px; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); text-decoration: none; color: var(--text); }
+.yomimono-list a:active { background: var(--surface); }
+.yomimono-title { display: block; font-size: 18px; font-weight: 700; line-height: 1.5; color: var(--link); text-decoration: underline; text-underline-offset: 4px; }
+.yomimono-sub { display: block; font-size: 15px; } /* 題名の2行目（「飛行機・流れ星・星との見分け方」など） */
 .yomimono-desc { display: block; margin-top: 4px; font-size: 15px; line-height: 1.6; color: var(--text-dim); }
-/* 記事：見出しの上の「読み物」（一覧へ戻るリンク）と、見出しの下の日付 */
-.article-kind { margin: 0 0 4px; font-size: 14px; }
-.article-kind a { display: inline-flex; align-items: center; min-height: 44px; }
+/* 記事：見出しの上の「‹ 読み物の一覧」と、見出しの下の日付。大見出しはサイト名（26px）より大きく（宇宙ステーションのページの大見出しと同じ） */
+.article-kind { margin: 0 0 4px; font-size: 16px; }
+.article-kind a { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; } /* gap：矢印と文字のあいだ（並べ方の都合で空白が消えるため） */
+.article-title { font-size: 24px; line-height: 1.4; }
+.article-sub { display: block; margin-top: 4px; font-size: 18px; }
+@media (min-width: 600px) { .article-title { font-size: 28px; } .article-sub { font-size: 20px; } }
+@media (max-width: 359px) { .article-title { font-size: 22px; } }
 .article-date { margin: 4px 0 8px; font-size: 14px; color: var(--text-dim); }
-article .faq-list ul li + li { margin-top: 8px; } /* 読み物の箇条書き：1項目が長いので、項目どうしを離して続きと見誤らないように */
+.article-note { font-size: 15px; color: var(--text-dim); }
+article .faq-list :is(ul, ol) li + li { margin-top: 12px; } /* 1項目が長いので、項目どうしを段落と同じだけ離す */
+.faq-list ol { margin: 8px 0 0; padding-left: 1.5em; font-size: 16px; line-height: 1.8; } /* 手順は番号つき */
+.faq-list :is(ul, ol) + p { margin-top: 12px; } /* 箇条書きのあとの段落を、箇条書きの続きと見誤らないように */
+/* 記事のページの下：主な行き先（黄色）と一覧へ（枠線）を同じ幅で縦に並べる（404 のリンクと同じ形） */
+.page-jump-stack { display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
+.page-jump-stack a { justify-content: space-between; }
 
 .site-footer { padding: 8px 0 32px; font-size: 14px; color: var(--text-dim); }
 .site-footer .wrap { border-top: 1px solid var(--line); padding-top: 16px; } /* 本文との境目 */
 .site-footer p { margin: 4px 0; }
 /* ページの下の、もう一方のページへの移動（上のタブまで戻らなくても移れるように） */
-.site-footer .page-jump { margin: 8px 0 16px; }
+.site-footer .page-jump { margin: 8px 0 16px; display: flex; flex-wrap: wrap; gap: 8px; } /* ボタンが2つあるページは横に並べ、入らなければ折り返す */
 /* 出典の小さなリンクと見分けるため、図鑑の「この衛星が見える時間を調べる」と同じ枠のボタンの形にする */
 .page-jump a { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; } /* gap：文字と矢印のあいだの空き（並べ方の都合で空白が消えるため） */
 /* お問い合わせ（Google フォーム）。指で押しやすいよう、リンクの高さを44pxにする */
