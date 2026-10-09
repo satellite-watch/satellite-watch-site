@@ -83,7 +83,7 @@ jobs:
       - name: サイトに載せるファイルだけを集める
         run: |
           mkdir -p _site/lib _site/img/sats
-          cp index.html zukan.html iss.html tiangong.html privacy.html 404.html robots.txt sitemap.xml favicon.svg favicon.ico apple-touch-icon.png _site/
+          cp index.html zukan.html iss.html tiangong.html privacy.html 404.html yomimono*.html robots.txt sitemap.xml favicon.svg favicon.ico apple-touch-icon.png _site/
           cp -r css js data _site/
           cp lib/satellite.min.js lib/satellite.js-LICENSE.md _site/lib/
           cp img/sats/*.jpg _site/img/sats/
