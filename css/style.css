@@ -14,6 +14,7 @@
   --shadow-sat: #7d88a8;   /* 影に入っている衛星 */
   --observer: #5ee0b0;     /* 観測地 */
   --sky: #0e1630;          /* 空の図・地図の下地 */
+  --map-sea: #21263f;      /* 地図の海の色（地理院タイルの海を、下の夜向けの加工にかけた色。タイルのつなぎ目のすき間から下地が見えても線にならないように。タイルを0.5px重ねる直し方は、かえって縦の線が出たのでやめた） */
   --white: #ffffff;
   /* 地図の国別の色分け（色の見分けが苦手な人にも区別しやすい Okabe-Ito の配色から） */
   --c-ru: #56b4e9;
@@ -292,6 +293,8 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 /* 地図はホイールで拡大・縮小しないので、マウスで操作する画面にだけ操作のしかたを添える */
 .map-zoom-hint { display: none; margin-top: 4px; }
 @media (hover: hover) and (pointer: fine) { .map-zoom-hint { display: block; } }
+.map-touch-note { display: none; margin-top: 4px; }
+@media (pointer: coarse) { .map-touch-note { display: block; } }
 .timebar { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; }
 .timebar .btn { min-width: 48px; padding: 8px; }
 #now-btn { margin-left: 6px; } /* 時刻の表示と離して、ボタンだと分かるように */
@@ -370,10 +373,22 @@ p.legend { display: flex; margin-left: 0; }
 #map {
   height: clamp(320px, 60vh, 560px);
   height: clamp(320px, 60svh, 560px); /* iPhone の上下のバーが出ている状態の高さで測る（対応していない端末は上の行） */
-  border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--sky); isolation: isolate;
+  border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--map-sea); isolation: isolate;
+  position: relative;
 }
 /* 地理院タイルを夜向けの暗い色に加工 */
-#map .leaflet-tile-pane { filter: invert(1) hue-rotate(190deg) brightness(.85) saturate(.6); }
+/* 加工はタイル1枚ずつにかける（タイルの置き場全体にかけると、端数のある位置でタイルの縁が黒い線になって出ていた。iPhone でも出ていた） */
+#map img.leaflet-tile { filter: invert(1) hue-rotate(190deg) brightness(.85) saturate(.6); }
+/* スマホ：1本の指で地図に触れてページを送ろうとしたときの案内（地図は2本の指で動かす。2026-11 オーナー判断） */
+.map-touch-hint {
+  /* 地図をほとんど隠さない、真ん中の小さな札（全面の幕だと、ページを送るたびに地図全体が暗くなっていた。2026-11-16 sat-designer の指摘） */
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1000; width: max-content; max-width: calc(100% - 32px); /* 幅は文字の長さに合わせる（指定しないと地図の半分の幅で折れる） */
+  padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--line-strong);
+  background: color-mix(in srgb, var(--surface) 94%, transparent); color: var(--text); font-size: 16px; font-weight: 700; line-height: 1.5; text-align: center;
+  pointer-events: none; opacity: 0; transition: opacity .2s;
+}
+.map-touch-hint.is-on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .map-touch-hint { transition: none; } }
 .leaflet-container { font: inherit; font-size: 13px; }
 /* 地図の部品を夜向けの色にそろえる（標準は白） */
 .leaflet-bar, .leaflet-touch .leaflet-bar { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); overflow: hidden; }
@@ -553,7 +568,7 @@ article .faq-list :is(ul, ol) li + li { margin-top: 12px; } /* 1項目が長い�
   .mapview .legends { grid-area: leg; }
   .mapview .legends .legend { margin-top: 0; } /* 凡例を色分けの切り替えに近づける */
   .mapview #map { grid-area: map; }
-  .mapview .map-zoom-hint { grid-area: zoomhint; }
+  .mapview .map-zoom-hint, .mapview .map-touch-note { grid-area: zoomhint; } /* 2つは同時には出ない（マウスか指か） */
   .mapview .timebar { grid-area: time; }
   /* PC は凡例を常に表示し、開け閉めのボタンは隠す */
   .legend-toggle { display: none; }
