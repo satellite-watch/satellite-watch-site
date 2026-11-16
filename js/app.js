@@ -871,35 +871,13 @@ function initMap() {
   });
 }
 
-// 指で操作する画面（スマホ・タブレット）では、地図は2本の指で動かす（2026-11 オーナー判断）。
+// 指で操作する画面（スマホ・タブレット）では、地図は2本の指で動かす（2026-11-16 オーナー判断）。
 // 1本の指で地図に触れてページを送ろうとすると地図が動いてしまい、下へ進めなかったため。
 // 1本の指の動きはページの送りに回し、2本の指の操作（動かす・広げる・縮める）は地図の部品の「ピンチ」が受け持つ。
-// 1本の指で地図の上を動かしたときだけ、やり方を短く出す。PC（マウス）は今までどおりドラッグで動かす
+// やり方は地図の下の添え書き（.map-touch-note）で伝える（地図の上の札は、同日オーナー判断でやめた）。PC（マウス）は今までどおりドラッグで動かす
 function setupTwoFingerMap() {
   if (!window.matchMedia('(pointer: coarse)').matches) return;
   map.dragging.disable();
-  const el = map.getContainer();
-  const hint = document.createElement('div');
-  hint.className = 'map-touch-hint';
-  hint.setAttribute('aria-hidden', 'true'); // 目で見て分かるための案内（読み上げでは地図を指で動かさないため）
-  // 文字を大きくした画面でも「で」だけが次の行に残らないよう、意味の切れ目で2つに分ける
-  hint.innerHTML = '<span class="nowrap">地図を動かすときは、</span><span class="nowrap">2本の指で</span>';
-  el.appendChild(hint);
-  let timer = 0, x0 = 0, y0 = 0, shownThisTouch = false, verticalShown = 0;
-  const show = () => { hint.classList.add('is-on'); clearTimeout(timer); timer = setTimeout(() => hint.classList.remove('is-on'), 1500); };
-  el.addEventListener('touchstart', (e) => {
-    if (e.touches.length > 1) { hint.classList.remove('is-on'); return; }
-    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; shownThisTouch = false;
-  }, { passive: true });
-  el.addEventListener('touchmove', (e) => {
-    if (e.touches.length !== 1) { hint.classList.remove('is-on'); return; }
-    const dx = Math.abs(e.touches[0].clientX - x0), dy = Math.abs(e.touches[0].clientY - y0);
-    // 点を押したときの指のわずかなぶれでは出さない（開いた吹き出しが暗くならないように。2026-11-16 sat-designer の指摘）
-    if (Math.max(dx, dy) < 10) return;
-    if (dx > dy) { show(); return; } // 横に動かした人は地図を動かしたい人（ページは横に送れない）なので、いつも出す
-    // 縦の動きはページを送りたい人がほとんどなので、開いてから最初の2回だけ出す（送るたびに出ると煩わしいため）
-    if (!shownThisTouch && verticalShown < 2) { verticalShown += 1; shownThisTouch = true; show(); }
-  }, { passive: true });
 }
 
 function updateObserverOnMap(pan) {

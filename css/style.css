@@ -379,16 +379,6 @@ p.legend { display: flex; margin-left: 0; }
 /* 地理院タイルを夜向けの暗い色に加工 */
 /* 加工はタイル1枚ずつにかける（タイルの置き場全体にかけると、端数のある位置でタイルの縁が黒い線になって出ていた。iPhone でも出ていた） */
 #map img.leaflet-tile { filter: invert(1) hue-rotate(190deg) brightness(.85) saturate(.6); }
-/* スマホ：1本の指で地図に触れてページを送ろうとしたときの案内（地図は2本の指で動かす。2026-11 オーナー判断） */
-.map-touch-hint {
-  /* 地図をほとんど隠さない、真ん中の小さな札（全面の幕だと、ページを送るたびに地図全体が暗くなっていた。2026-11-16 sat-designer の指摘） */
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1000; width: max-content; max-width: calc(100% - 32px); /* 幅は文字の長さに合わせる（指定しないと地図の半分の幅で折れる） */
-  padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--line-strong);
-  background: color-mix(in srgb, var(--surface) 94%, transparent); color: var(--text); font-size: 16px; font-weight: 700; line-height: 1.5; text-align: center;
-  pointer-events: none; opacity: 0; transition: opacity .2s;
-}
-.map-touch-hint.is-on { opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .map-touch-hint { transition: none; } }
 .leaflet-container { font: inherit; font-size: 13px; }
 /* 地図の部品を夜向けの色にそろえる（標準は白） */
 .leaflet-bar, .leaflet-touch .leaflet-bar { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); overflow: hidden; }
